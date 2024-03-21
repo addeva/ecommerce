@@ -1,0 +1,20 @@
+<% if (typeof username !== 'undefined') { %>
+<h1>Hello <%= username %></h1>
+<% } else { %>
+<h1>Create Account</h1>
+<form action="/register" method="POST">
+  <div>
+    <label for="username">User Name: </label>
+    <input type="text" id="username" name="username" required>
+  </div>
+  <div>
+    <label for="email">Email: </label>
+    <input type="email" id="email" name="email" required>
+  </div>
+  <button type="submit">Verify this email.</button>
+</form>
+<% } %>
+
+<% if (typeof message !== 'undefined') { %>
+<h3><%= message %></h3>
+<% } %>

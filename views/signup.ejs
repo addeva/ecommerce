@@ -1,0 +1,26 @@
+<h1>Sign up with email & password.</h1>
+<form action="/signup" method="POST">
+  <div>
+    <!-- Hidden input field to store username value -->
+    <input type="hidden" value="<%= username %>" name="username" required>
+    <!-- Display username value to the user -->
+    <label for="usernameDisplay">User Name: </label>
+    <input type="text" disabled value="<%= username %>" id="usernameDisplay">
+  </div>
+  <div>
+    <!-- Hidden input field to store email value -->
+    <input type="hidden" value="<%= email %>" name="email" required>
+    <!-- Display email value to the user -->
+    <label for="emailDisplay">Email: </label>
+    <input type="email" disabled value="<%= email %>" id="emailDisplay">
+  </div>
+  <div>
+    <label for="password">Password: </label>
+    <input type="password" id="password" name="password" required>
+  </div>
+  <button type="submit">Sign up</button>
+</form>
+
+<% if (typeof message !== 'undefined') { %>
+<h3><%= message %></h3>
+<% } %>
