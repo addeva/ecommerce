@@ -73,7 +73,7 @@ app.post("/register", (req, res) => {
     // send verification email
     const verificationLink = `http://localhost:3000/verify/${verificationToken}`;
     const mailOptions = {
-      from: process.env.USER,
+      from: process.env.USER_WITH_NAME,
       to: email,
       subject: "Email Verification",
       html: `<h3>Hello ${username}</h3>
