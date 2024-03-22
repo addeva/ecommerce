@@ -68,7 +68,7 @@ app.get("/signup", (req, res) => {
       message: req.session.message,
     });
   }
-  res.render("signup");
+  res.render("signup", { message: req.session.message });
 });
 
 app.post("/signup", async (req, res) => {
@@ -203,6 +203,16 @@ app.post("/login", async (req, res) => {
   // redirect to / with user info stored in req.session
   req.session.user = { username: user.username, email, password };
   res.redirect("/");
+});
+
+app.get("/logout", (req, res) => {
+  req.session.destroy((error) => {
+    if (error) {
+      console.error("Error logging out: ", error);
+    }
+  });
+  const redirectTo = req.get("referer") || "/";
+  res.redirect(redirectTo);
 });
 
 app.listen(3000);
