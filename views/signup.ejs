@@ -1,7 +1,7 @@
 <% if (typeof username !== "undefined" && typeof email !== "undefined") { %>
 
 <h1>Please set your password.</h1>
-<form action="/signup" method="POST">
+<form action="/user/signup" method="POST">
   <div>
     <!-- Hidden input field to store username value -->
     <input type="hidden" value="<%= username %>" name="username" required>
@@ -26,7 +26,7 @@
 <% } else { %>
 
 <h1>Verify Email</h1>
-<form action="/verify" method="POST">
+<form action="/user/verify" method="POST">
   <div>
     <label for="username">User Name: </label>
     <input type="text" id="username" name="username">
