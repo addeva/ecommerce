@@ -9,9 +9,6 @@ const expressLayouts = require("express-ejs-layouts");
 const mongoose = require("mongoose");
 const session = require("express-session");
 
-// import models
-const User = require("./models/users");
-
 // app setups
 const app = express();
 app.set("view engine", "ejs");
