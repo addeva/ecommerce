@@ -91,6 +91,7 @@ app.post("/signup", async (req, res) => {
     // Update the hashedPassword property if user exists
     const hashedPassword = await bcrypt.hash(password, 10);
     user.hashedPassword = hashedPassword;
+    user.signupAt = Date.now();
     await user.save();
     req.session.user = { username, email, password };
     return res.redirect("/login");
@@ -201,11 +202,23 @@ app.post("/login", async (req, res) => {
   }
 
   // redirect to / with user info stored in req.session
+  user.lastLogin = Date.now();
+  await user.save();
   req.session.user = { username: user.username, email, password };
   res.redirect("/");
 });
 
-app.get("/logout", (req, res) => {
+app.get("/logout", async (req, res) => {
+  // update user.lastLogout before logout
+  try {
+    const user = await User.findOne({ email: req.session.user.email });
+    user.lastLogout = Date.now();
+    await user.save();
+  } catch (error) {
+    console.error(error);
+  }
+
+  // destroy session and redirect to previous page
   req.session.destroy((error) => {
     if (error) {
       console.error("Error logging out: ", error);

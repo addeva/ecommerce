@@ -15,8 +15,9 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: "noVerificationTokenGeneratedYet",
   },
-  signedUpAt: { type: Date, required: true, default: Date.now() },
-  lastLogin: { type: Date, required: true, default: Date.now() },
+  signupAt: { type: Date, required: true, default: Date.now() },
+  lastLogin: { type: Date },
+  lastLogout: { type: Date },
 });
 
 module.exports = mongoose.model("User", userSchema);
