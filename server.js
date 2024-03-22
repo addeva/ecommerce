@@ -8,6 +8,7 @@ const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const methodOverride = require("method-override");
 
 // app setups
 const app = express();
@@ -16,6 +17,7 @@ app.set("views", __dirname + "/views");
 app.set("layout", "layouts/layout");
 app.use(expressLayouts);
 app.use(express.urlencoded({ extended: false }));
+app.use(methodOverride("_method"));
 app.use(
   session({
     secret: "secret",

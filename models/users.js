@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     default: "undefined",
   },
   verified: { type: Boolean, required: true, default: false },
-  verificationToken: {
+  verification: {
     token: {
       type: String,
       required: true,
@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
       required: true,
       default: new Date(Date.now() + 1000 * 60 * 60),
     },
+  },
+  resetPassword: {
+    token: { type: String, required: false },
+    expireAt: { type: Date, required: false },
   },
   signupAt: { type: Date, required: true, default: Date.now() },
   lastLogin: { type: Date },

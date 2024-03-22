@@ -4,14 +4,11 @@
     <ul>
       <li><a href="/user/cart">Cart</a></li>
       <li><a href="/user/tracklist">Tracklist</a></li>
-      <% if ( showSignup ) { %>
-      <li><a href="/user/signup">Sign up</a></li>
-      <% } %>
-      <% if ( showLogin ) { %>
-      <li><a href="/user/login">Log in</a></li>
-      <% } %>
-      <% if ( showLogout ) { %>
+      <% if (typeof user !== "undefined" || typeof username !== "undefined" || typeof email !== "undefined") { %>
       <li><a href="/user/logout">Log out</a></li>
+      <% } else { %>
+      <li><a href="/user/signup">Sign up</a></li>
+      <li><a href="/user/login">Log in</a></li>
       <% } %>
     </ul>
   </nav>
