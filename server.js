@@ -52,7 +52,7 @@ const transporter = nodemailer.createTransport({
 // route for homepage
 app.get("/", (req, res) => {
   res.render("index", {
-    username: req.session.username,
+    username: req.session.user.username,
     message: req.session.message,
   });
 });
@@ -116,19 +116,18 @@ app.get("/verify/:token", async (req, res) => {
   }
   user.verified = true;
   await user.save();
-  req.session.username = user.username;
-  req.session.email = user.email;
+  req.session.user = { username: user.username, email: user.email };
   res.render("signup", {
-    username: req.session.username,
-    email: req.session.email,
+    username: req.session.user.username,
+    email: req.session.user.email,
   });
 });
 
 // route for signup
 app.get("/signup", (req, res) => {
   res.render("signup", {
-    username: req.session.username,
-    email: req.session.email,
+    username: req.session.user.username,
+    email: req.session.user.email,
     message: req.session.message,
   });
 });
@@ -136,25 +135,25 @@ app.get("/signup", (req, res) => {
 app.post("/signup", async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    // redirect to /signup if input imcomplete
     if (!username || !email || !password) {
       req.session.message = "Username, email and password are all required.";
-      req.session.username = username;
-      req.session.email = email;
-      req.session.password = password;
+      req.session.user = { username, email, password };
       return res.redirect("/signup");
     }
+
+    // redirect to /signup if input incorrect
     const user = await User.findOne({ username, email });
     if (!user) {
       req.session.message = "No such user with the username and email.";
       return res.redirect("/signup");
     }
+
     // Update the hashedPassword property if user exists
     const hashedPassword = await bcrypt.hash(password, 10);
     user.hashedPassword = hashedPassword;
     await user.save();
-    req.session.username = username;
-    req.session.email = email;
-    req.session.password = password;
+    req.session.user = { username, email, password };
     return res.redirect("/login");
   } catch (error) {
     console.error(error);
@@ -164,37 +163,40 @@ app.post("/signup", async (req, res) => {
 
 // route for login
 app.get("/login", (req, res) => {
-  res.render("login", {
-    username: req.session.username,
-    email: req.session.email,
-    password: req.session.password,
-  });
+  res.render(
+    "login" /*, {
+    username: req.session.user.username,
+    email: req.session.user.email,
+    password: req.session.user.password,
+  }*/
+  );
 });
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
+  // redirect to /login if input imcomplete
   if (!email || !password) {
     req.session.message = "Email and password are required to log in.";
     return res.redirect("/login");
   }
 
-  // check whether input email exists
+  // redirect to /login if email incorrect
   const user = await User.findOne({ email: email });
   if (!user) {
     req.session.message = "This email hasn't been registered.";
     return res.redirect("/login");
   }
 
-  // check whether password is correct
+  // redirect to /login if password incorrect
   const match = await bcrypt.compare(password, user.hashedPassword);
   if (!match) {
     req.session.message = "Password incorrect.";
     return res.redirect("/login");
   }
-  req.session.username = user.username;
-  req.session.email = email;
-  req.session.password = password;
-  req.session.message = null;
+
+  // redirect to / with user info stored in req.session
+  req.session.user = { username: user.username, email, password };
+  console.log(req.session);
   res.redirect("/");
 });
 

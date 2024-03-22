@@ -1,6 +1,6 @@
 <h1>Log in</h1>
 
-<% if (email && password ){ %>
+<% if (typeof email !== 'undefined' && typeof password !== 'undefined' ){ %>
 <form action="/login" method="POST">
   <div>
     <label for="email">Email: </label>
@@ -24,4 +24,8 @@
   </div>
   <button type="submit">Log in</button>
 </form>
+<% } %>
+
+<% if (typeof message !== 'undefined') { %>
+<h3><%= message %></h3>
 <% } %>
