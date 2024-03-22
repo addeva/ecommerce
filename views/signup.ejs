@@ -1,6 +1,6 @@
 <% if (typeof username !== "undefined" && typeof email !== "undefined") { %>
 
-<h1>Please set your password.</h1>
+<h1>Set password.</h1>
 <form action="/user/signup" method="POST">
   <div>
     <!-- Hidden input field to store username value -->
@@ -40,6 +40,6 @@
 
 <% } %>
 
-<% if (typeof message !== 'undefined') { %>
+<% if (locals.message) { %>
 <h3><%= message %></h3>
 <% } %>

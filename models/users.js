@@ -7,13 +7,20 @@ const userSchema = new mongoose.Schema({
   hashedPassword: {
     type: String,
     required: true,
-    default: "passwordNotSetYet",
+    default: "undefined",
   },
   verified: { type: Boolean, required: true, default: false },
   verificationToken: {
-    type: String,
-    required: true,
-    default: "noVerificationTokenGeneratedYet",
+    token: {
+      type: String,
+      required: true,
+      default: "undefined",
+    },
+    expireAt: {
+      type: Date,
+      required: true,
+      default: new Date(Date.now() + 1000 * 60 * 60),
+    },
   },
   signupAt: { type: Date, required: true, default: Date.now() },
   lastLogin: { type: Date },
