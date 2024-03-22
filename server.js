@@ -57,9 +57,12 @@ app.get("/", (req, res) => {
   if (req.session.user) {
     return res.render("index", {
       username: req.session.user.username,
+      showSignup: false,
+      showLogin: false,
+      showLogout: true,
     });
   }
-  res.render("index");
+  res.render("index", { showSignup: true, showLogin: true, showLogout: false });
 });
 
 // route for signup
@@ -69,9 +72,17 @@ app.get("/signup", (req, res) => {
       username: req.session.user.username,
       email: req.session.user.email,
       message: req.session.message,
+      showSignup: true,
+      showLogin: true,
+      showLogout: false,
     });
   }
-  res.render("signup", { message: req.session.message });
+  res.render("signup", {
+    message: req.session.message,
+    showSignup: true,
+    showLogin: true,
+    showLogout: false,
+  });
 });
 
 app.post("/signup", async (req, res) => {
@@ -177,9 +188,12 @@ app.get("/login", (req, res) => {
       username: req.session.user.username,
       email: req.session.user.email,
       password: req.session.user.password,
+      showSignup: true,
+      showLogin: true,
+      showLogout: false,
     });
   }
-  res.render("login");
+  res.render("login", { showSignup: true, showLogin: true, showLogout: false });
 });
 
 app.post("/login", async (req, res) => {
