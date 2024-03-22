@@ -51,85 +51,24 @@ const transporter = nodemailer.createTransport({
 
 // route for homepage
 app.get("/", (req, res) => {
-  res.render("index", {
-    username: req.session.user.username,
-    message: req.session.message,
-  });
-});
-
-// route for email registration
-app.post("/register", (req, res) => {
-  try {
-    // check whether email is valid
-    const { username, email } = req.body;
-    if (!username || !email) {
-      req.session.message = "Username and email are required for registration.";
-      return res.redirect("/");
-    }
-
-    // generate token
-    const verificationToken = uuidv4();
-
-    // send verification email
-    const verificationLink = `http://localhost:3000/verify/${verificationToken}`;
-    const mailOptions = {
-      from: process.env.USER_WITH_NAME,
-      to: email,
-      subject: "Email Verification",
-      html: `<h3>Hello ${username}</h3>
-        <h4>Please click the link below to confirm your email:</h4>
-        <a href="${verificationLink}">${verificationLink}</a>`,
-    };
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error(error);
-      } else {
-        console.log("Email sent: ", info.response);
-      }
+  if (req.session.user) {
+    return res.render("index", {
+      username: req.session.user.username,
     });
-
-    // redirecrt the user to index page with check mail message
-    req.session.message = `Please check your email (${email}) for verification.`;
-    res.redirect("/");
-
-    // create user
-    const user = User.create({
-      username,
-      email,
-      verified: false,
-      verificationToken,
-    });
-  } catch (error) {
-    console.error(error);
-    req.session.message = "Internal sever error.";
-    res.redirect("/");
   }
-});
-
-// route for email verification
-app.get("/verify/:token", async (req, res) => {
-  const token = req.params.token;
-  const user = await User.findOne({ verificationToken: token });
-  if (!user) {
-    req.session.message = "Invalid verification token.";
-    return res.redirect("/");
-  }
-  user.verified = true;
-  await user.save();
-  req.session.user = { username: user.username, email: user.email };
-  res.render("signup", {
-    username: req.session.user.username,
-    email: req.session.user.email,
-  });
+  res.render("index");
 });
 
 // route for signup
 app.get("/signup", (req, res) => {
-  res.render("signup", {
-    username: req.session.user.username,
-    email: req.session.user.email,
-    message: req.session.message,
-  });
+  if (req.session.user) {
+    return res.render("signup", {
+      username: req.session.user.username,
+      email: req.session.user.email,
+      message: req.session.message,
+    });
+  }
+  res.render("signup");
 });
 
 app.post("/signup", async (req, res) => {
@@ -161,15 +100,82 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+// route for email verification
+app.post("/verify", (req, res) => {
+  try {
+    // check whether username and email are valid
+    const { username, email } = req.body;
+    if (!username || !email) {
+      req.session.message =
+        "Username and email are required for email verification.";
+      return res.redirect("/signup");
+    }
+
+    // generate token
+    const verificationToken = uuidv4();
+
+    // send verification email
+    const verificationLink = `http://localhost:3000/verify/${verificationToken}`;
+    const mailOptions = {
+      from: process.env.USER_WITH_NAME,
+      to: email,
+      subject: "Email Verification",
+      html: `<h3>Hello ${username}</h3>
+        <h4>Please click the link below to confirm your email:</h4>
+        <a href="${verificationLink}">${verificationLink}</a>`,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error(error);
+      } else {
+        console.log("Email sent: ", info.response);
+      }
+    });
+
+    // create user
+    const user = User.create({
+      username,
+      email,
+      verified: false,
+      verificationToken,
+    });
+
+    // redirecrt the user to /signup with check mail message
+    req.session.message = `Please check your email (${email}) for verification.`;
+    console.log(req.session);
+    res.redirect("/signup");
+  } catch (error) {
+    console.error(error);
+    req.session.message = "Internal sever error.";
+    res.redirect("/signup");
+  }
+});
+
+// route for email verification
+app.get("/verify/:token", async (req, res) => {
+  const token = req.params.token;
+  const user = await User.findOne({ verificationToken: token });
+  if (!user) {
+    req.session.message = "Invalid verification token.";
+    return res.redirect("/signup");
+  }
+  user.verified = true;
+  await user.save();
+  req.session.user = { username: user.username, email: user.email };
+  req.session.message = null;
+  res.redirect("/signup");
+});
+
 // route for login
 app.get("/login", (req, res) => {
-  res.render(
-    "login" /*, {
-    username: req.session.user.username,
-    email: req.session.user.email,
-    password: req.session.user.password,
-  }*/
-  );
+  if (req.session.user) {
+    return res.render("login", {
+      username: req.session.user.username,
+      email: req.session.user.email,
+      password: req.session.user.password,
+    });
+  }
+  res.render("login");
 });
 
 app.post("/login", async (req, res) => {
@@ -183,7 +189,7 @@ app.post("/login", async (req, res) => {
   // redirect to /login if email incorrect
   const user = await User.findOne({ email: email });
   if (!user) {
-    req.session.message = "This email hasn't been registered.";
+    req.session.message = "This email hasn't been verified.";
     return res.redirect("/login");
   }
 
@@ -196,7 +202,6 @@ app.post("/login", async (req, res) => {
 
   // redirect to / with user info stored in req.session
   req.session.user = { username: user.username, email, password };
-  console.log(req.session);
   res.redirect("/");
 });
 

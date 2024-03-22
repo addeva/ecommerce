@@ -1,4 +1,8 @@
-<h1>Sign up with email & password.</h1>
+<%- include('partials/header') %>
+
+<% if (typeof username !== "undefined" && typeof email !== "undefined") { %>
+
+<h1>Please set your password.</h1>
 <form action="/signup" method="POST">
   <div>
     <!-- Hidden input field to store username value -->
@@ -20,6 +24,23 @@
   </div>
   <button type="submit">Sign up</button>
 </form>
+
+<% } else { %>
+
+<h1>Verify Email</h1>
+<form action="/verify" method="POST">
+  <div>
+    <label for="username">User Name: </label>
+    <input type="text" id="username" name="username">
+  </div>
+  <div>
+    <label for="email">Email: </label>
+    <input type="email" id="email" name="email">
+  </div>
+  <button type="submit">Verify Email</button>
+</form>
+
+<% } %>
 
 <% if (typeof message !== 'undefined') { %>
 <h3><%= message %></h3>
