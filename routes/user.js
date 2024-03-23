@@ -139,10 +139,13 @@ router.post("/verify", async (req, res) => {
 
     // update user whose email has been registered
     if (emailRegistered) {
-      emailRegistered.username = username;
-      emailRegistered.verified = false;
-      emailRegistered.verification = verification;
-      await emailRegistered.save();
+      await emailRegistered.updateOne({
+        $set: {
+          username,
+          verified: false,
+          verification,
+        },
+      });
     } else {
       // create new user with provided data
       const user = User.create({
