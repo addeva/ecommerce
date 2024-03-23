@@ -3,6 +3,7 @@ const express = require("express");
 const { v4: uuidv4 } = require("uuid");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
+const moment = require("moment-timezone");
 
 // import models
 const User = require("../models/users");
@@ -100,17 +101,14 @@ router.post("/verify", async (req, res) => {
           username: emailRegistered.username,
           email: emailRegistered.email,
         };
-        if (emailRegistered.hashedPassword !== "undefined") {
+        if (emailRegistered.hashedPassword !== "undefined")
           return res.redirect("/user/login");
-        } else {
-          return res.redirect("/user/signup");
-        }
-      } else {
-        if (emailRegistered.expireAt > Date.now()) {
-          // email not verified but link expired => redirect /user/signup and send a new verification email
-          req.session.message = `Verification email has been sent. It's still valid. Please check your email(${emailRegistered.email}).`;
-          return res.redirect("/user/signup");
-        }
+        return res.redirect("/user/signup");
+      }
+      if (emailRegistered.expireAt > Date.now()) {
+        // email not verified but link expired => redirect /user/signup and send a new verification email
+        req.session.message = `Verification email has been sent. It's still valid. Please check your email(${emailRegistered.email}).`;
+        return res.redirect("/user/signup");
       }
     }
 
