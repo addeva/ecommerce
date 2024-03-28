@@ -26,18 +26,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// route for signup
+// signup a user
 router.get("/signup", (req, res) => {
-  if (req.session.user) {
-    return res.render("signup", {
-      username: req.session.user.username,
-      email: req.session.user.email,
-      message: req.session.message,
-    });
-  }
-  res.render("signup", {
-    message: req.session.message,
-  });
+  res.render("user/signup");
 });
 
 router.post("/signup", async (req, res) => {
@@ -78,7 +69,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// route for email verification
+// email verification
 router.post("/verify", async (req, res) => {
   try {
     // check whether username and email are valid
@@ -101,8 +92,9 @@ router.post("/verify", async (req, res) => {
           username: emailRegistered.username,
           email: emailRegistered.email,
         };
-        if (emailRegistered.hashedPassword !== "undefined")
+        if (emailRegistered.hashedPassword !== "undefined") {
           return res.redirect("/user/login");
+        }
         return res.redirect("/user/signup");
       }
       if (emailRegistered.expireAt > Date.now()) {
@@ -166,7 +158,7 @@ router.post("/verify", async (req, res) => {
   }
 });
 
-// route for email verification
+// email verification
 router.get("/verify/:token", async (req, res) => {
   const token = req.params.token;
   const user = await User.findOne({
@@ -185,24 +177,16 @@ router.get("/verify/:token", async (req, res) => {
   res.redirect("/user/signup");
 });
 
-// route for login
+// login a user
 router.get("/login", (req, res) => {
-  if (req.session.user) {
-    return res.render("login", {
-      username: req.session.user.username,
-      email: req.session.user.email,
-      password: req.session.user.password,
-      message: req.session.message,
-    });
-  }
-  res.render("login");
+  res.render("user/login");
 });
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   // rerender login page if input imcomplete
   if (!email || !password) {
-    return res.render("login", {
+    return res.render("user/login", {
       message: "Email and password are required to log in.",
     });
   }
@@ -210,7 +194,7 @@ router.post("/login", async (req, res) => {
   // rerender login page if email incorrect
   const user = await User.findOne({ email });
   if (!user) {
-    return res.render("login", {
+    return res.render("user/login", {
       message: "Email or password incorrect.",
     });
   }
@@ -218,7 +202,7 @@ router.post("/login", async (req, res) => {
   // rerender login page if password incorrect
   const match = await bcrypt.compare(password, user.hashedPassword);
   if (!match) {
-    return res.render("login", {
+    return res.render("user/login", {
       message: "Email or password incorrect.",
     });
   }
@@ -226,20 +210,20 @@ router.post("/login", async (req, res) => {
   // redirect to / with user info stored in req.session
   user.lastLogin = Date.now();
   await user.save();
-  req.session.user = { username: user.username, email, password };
+  req.session.user = { id: user._id, username: user.username, email, password };
   res.redirect("/");
 });
 
-// route for reseting password
+// reset password
 router.get("/resetPassword", (req, res) => {
-  res.render("resetPassword");
+  res.render("user/resetPassword");
 });
 
 router.post("/resetPassword", async (req, res) => {
   const { email } = req.body;
   // rerender resetPassword page of input data imcomplete
   if (!email) {
-    return res.render("resetPassword", {
+    return res.render("user/resetPassword", {
       message: "Email is required.",
     });
   }
@@ -247,7 +231,7 @@ router.post("/resetPassword", async (req, res) => {
   // no user with provided email => rerender resetPassword page
   const user = await User.findOne({ email });
   if (!user) {
-    return res.render("resetPassword", {
+    return res.render("user/resetPassword", {
       message: "This email hasn't been registered.",
     });
   }
@@ -256,7 +240,7 @@ router.post("/resetPassword", async (req, res) => {
     typeof user.resetPassword.token !== "undefined" &&
     user.resetPassword.expireAt > Date.now()
   ) {
-    return res.render("resetPassword", {
+    return res.render("user/resetPassword", {
       message:
         "You have requested for reseting password with this email within minutes. Check your email or request later.",
     });
@@ -278,7 +262,7 @@ router.post("/resetPassword", async (req, res) => {
     to: email,
     subject: "Password Reseting",
     html: `<h3>Hello ${user.username}</h3>
-        <h4>Please click the link below to reset your pasword:</h4>
+        <h4>Please click the link below to reset your password:</h4>
         <a href="${resetPasswordLink}">${resetPasswordLink}</a>`,
   };
   transporter.sendMail(mailOptions, (error, info) => {
@@ -289,7 +273,8 @@ router.post("/resetPassword", async (req, res) => {
     }
   });
 
-  res.render("resetPassword", {
+  res.render("user/resetPassword", {
+    user: { email },
     message: `Password reseting email has been sent to your email (${user.email}).`,
   });
 });
@@ -298,8 +283,8 @@ router.put("/resetPassword", async (req, res) => {
   const { email, newPassword, confirmNewPassword } = req.body;
   // rerender password reseting page if input data imcomplete
   if (!email || !newPassword || !confirmNewPassword) {
-    return res.render("resetPassword", {
-      email: email,
+    return res.render("user/resetPassword", {
+      user: { email },
       message:
         "Email, new password and confirming new password are all required.",
     });
@@ -307,8 +292,8 @@ router.put("/resetPassword", async (req, res) => {
 
   // resetPassword and confirmNewPassword don't match => rerender password reseting page
   if (newPassword !== confirmNewPassword) {
-    return res.render("resetPassword", {
-      email: email,
+    return res.render("user/resetPassword", {
+      user: { email },
       message: "New passwords DON'T match.",
     });
   }
@@ -316,13 +301,13 @@ router.put("/resetPassword", async (req, res) => {
   // check if user with that email exists
   const user = await User.findOne({ email });
   if (!user) {
-    return res.render("resetPassword", {
-      email: email,
+    return res.render("user/resetPassword", {
+      user: { email },
       message: "No such use with that email.",
     });
   }
 
-  // new psswords match => redirect to /user/login
+  // new passwords match => redirect to /user/login
   const hashedNewPassword = await bcrypt.hash(newPassword, 10);
   user.hashedPassword = hashedNewPassword;
   await user.save();
@@ -332,18 +317,17 @@ router.put("/resetPassword", async (req, res) => {
 
 // route for verify password reset link
 router.get("/resetPassword/:token", async (req, res) => {
-  const { token } = req.params;
+  const token = req.params.token;
   const user = await User.findOne({
     "resetPassword.token": token,
     "resetPassword.expireAt": { $gt: Date.now() },
   });
-  console.log(user);
   if (!user) {
     req.session.message =
       "Invalid or expired password reset link. Enter email and get a new one.";
     return res.redirect("/user/resetPassword");
   }
-  res.render("resetPassword", { email: user.email, message: null });
+  res.render("user/resetPassword", { user: { email: user.email } });
 });
 
 router.get("/logout", async (req, res) => {
@@ -364,6 +348,30 @@ router.get("/logout", async (req, res) => {
   });
   const redirectTo = req.get("referer") || "/";
   res.redirect(redirectTo);
+});
+
+// user profile
+router.get("/:id", async (req, res) => {
+  if (!req.session.user) {
+    req.session.message = "Please log in.";
+    return res.redirect("/user/login");
+  }
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id);
+    console.log(user);
+    if (!user) {
+      req.session.message = "Invalid user id.";
+      return res.redirect("/user/login");
+    }
+    res.render("user/profile", {
+      user: { username: user.username, email: user.email },
+    });
+  } catch (error) {
+    console.error(error);
+    req.session.message = "Error retrieving user profile.";
+    res.redirect("/user/login");
+  }
 });
 
 module.exports = router;

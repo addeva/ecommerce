@@ -5,16 +5,34 @@ const express = require("express");
 const router = express.Router();
 
 // route for homepage
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
+  // get all products
+  let products = await fetch("https://fakestoreapi.com/products").then((res) =>
+    res.json()
+  );
+
+  // filter products with search options
+  let searchOptions = {};
+  if (req.params.keyword) {
+    searchOptions.keyword = new RegExp(req.params.keyword, "i");
+  }
+  if (req.params.price_low) {
+    searchOptions.price_low = req.params.price_low;
+  }
+  if (req.params.price_high) {
+    searchOptions.price_high = req.params.price_high;
+  }
+  if (req.params.category) {
+    searchOptions.category = req.params.category;
+  }
+
   if (req.session.user) {
     return res.render("index", {
-      username: req.session.user.username,
-      showSignup: false,
-      showLogin: false,
-      showLogout: true,
+      user: req.session.user,
+      products,
     });
   }
-  res.render("index", { showSignup: true, showLogin: true, showLogout: false });
+  res.render("index", { products });
 });
 
 module.exports = router;

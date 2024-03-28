@@ -16,6 +16,7 @@ app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
 app.set("layout", "layouts/layout");
 app.use(expressLayouts);
+app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride("_method"));
 app.use(
@@ -36,9 +37,11 @@ db.once("open", () => console.log("Connected to mongoose."));
 // import routers
 const indexRouter = require("./routes/index");
 const userRouter = require("./routes/user");
+const productRouter = require("./routes/product");
 
 // use routers
 app.use("/", indexRouter);
 app.use("/user", userRouter);
+app.use("/product", productRouter);
 
 app.listen(3000);

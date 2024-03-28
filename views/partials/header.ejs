@@ -1,15 +1,20 @@
 <header>
   <nav>
-    <a href="/">Home</a>
     <ul>
-      <li><a href="/user/cart">Cart</a></li>
-      <li><a href="/user/tracklist">Tracklist</a></li>
-      <% if (typeof user !== "undefined" || typeof username !== "undefined" || typeof email !== "undefined") { %>
-      <li><a href="/user/logout">Log out</a></li>
-      <% } else { %>
-      <li><a href="/user/signup">Sign up</a></li>
-      <li><a href="/user/login">Log in</a></li>
-      <% } %>
+      <div class="home-link-container">
+        <li><b><a href="/">FuMart</a></b></li>
+      </div>
+      <div class="user-link-container">
+        <li><a href="/user/cart">Cart</a></li>
+        <li><a href="/user/tracklist">Tracklist</a></li>
+        <% if (typeof user !== "undefined" ) { %>
+        <li><a href="/user/<%= user.id %>">Profile</a></li>
+        <li class="user-link"><a href="/user/logout">Log out</a></li>
+        <% } else { %>
+        <li class="user-link"><a href="/user/signup">Sign up</a></li>
+        <li class="user-link"><a href="/user/login">Log in</a></li>
+        <% } %>
+      </div>
     </ul>
   </nav>
 </header>
