@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema({
   signupAt: { type: Date, required: true, default: Date.now() },
   lastLogin: { type: Date },
   lastLogout: { type: Date },
+  isSeller: { type: Boolean, required: true, default: false },
 });
 
 module.exports = mongoose.model("User", userSchema);

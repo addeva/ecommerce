@@ -37,11 +37,13 @@ db.once("open", () => console.log("Connected to mongoose."));
 // import routers
 const indexRouter = require("./routes/index");
 const userRouter = require("./routes/user");
+const sellerRouter = require("./routes/seller");
 const productRouter = require("./routes/product");
 
 // use routers
 app.use("/", indexRouter);
 app.use("/user", userRouter);
+app.use("/seller", sellerRouter);
 app.use("/product", productRouter);
 
 app.listen(3000);

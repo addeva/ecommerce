@@ -7,6 +7,7 @@ const moment = require("moment-timezone");
 
 // import models
 const User = require("../models/users");
+const Seller = require("../models/sellers");
 
 // router init
 const router = express.Router();
@@ -160,7 +161,7 @@ router.post("/verify", async (req, res) => {
 
 // email verification
 router.get("/verify/:token", async (req, res) => {
-  const token = req.params.token;
+  const { token } = req.params;
   const user = await User.findOne({
     "verification.token": token,
     "verification.expireAt": { $gt: Date.now() },
@@ -210,7 +211,13 @@ router.post("/login", async (req, res) => {
   // redirect to / with user info stored in req.session
   user.lastLogin = Date.now();
   await user.save();
-  req.session.user = { id: user._id, username: user.username, email, password };
+  req.session.user = {
+    id: user._id,
+    username: user.username,
+    email,
+    password,
+    isSeller: user.isSeller,
+  };
   res.redirect("/");
 });
 
@@ -317,7 +324,7 @@ router.put("/resetPassword", async (req, res) => {
 
 // route for verify password reset link
 router.get("/resetPassword/:token", async (req, res) => {
-  const token = req.params.token;
+  const { token } = req.params;
   const user = await User.findOne({
     "resetPassword.token": token,
     "resetPassword.expireAt": { $gt: Date.now() },
@@ -357,15 +364,19 @@ router.get("/:id", async (req, res) => {
     return res.redirect("/user/login");
   }
   try {
-    const id = req.params.id;
+    const { id } = req.params;
     const user = await User.findById(id);
-    console.log(user);
     if (!user) {
       req.session.message = "Invalid user id.";
       return res.redirect("/user/login");
     }
     res.render("user/profile", {
-      user: { username: user.username, email: user.email },
+      user: {
+        id,
+        username: user.username,
+        email: user.email,
+        isSeller: user.isSeller,
+      },
     });
   } catch (error) {
     console.error(error);

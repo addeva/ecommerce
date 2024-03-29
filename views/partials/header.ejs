@@ -8,11 +8,14 @@
         <li><a href="/user/cart">Cart</a></li>
         <li><a href="/user/tracklist">Tracklist</a></li>
         <% if (typeof user !== "undefined" ) { %>
-        <li><a href="/user/<%= user.id %>">Profile</a></li>
-        <li class="user-link"><a href="/user/logout">Log out</a></li>
+          <% if (user.isSeller) { %>
+          <li><a href="/product/create">Put on New Product</a></li>
+          <% } %>
+          <li><a href="/user/<%= user.id %>">Profile</a></li>
+          <li class="user-link"><a href="/user/logout">Log out</a></li>
         <% } else { %>
-        <li class="user-link"><a href="/user/signup">Sign up</a></li>
-        <li class="user-link"><a href="/user/login">Log in</a></li>
+          <li class="user-link"><a href="/user/signup">Sign up</a></li>
+          <li class="user-link"><a href="/user/login">Log in</a></li>
         <% } %>
       </div>
     </ul>
