@@ -353,8 +353,7 @@ router.get("/logout", async (req, res) => {
       console.error("Error logging out: ", error);
     }
   });
-  const redirectTo = req.get("referer") || "/";
-  res.redirect(redirectTo);
+  res.redirect("/");
 });
 
 // user profile
