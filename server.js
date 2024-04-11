@@ -8,7 +8,9 @@ const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const passport = require("passport");
 const methodOverride = require("method-override");
+const flash = require("express-flash");
 
 // app setups
 const app = express();
@@ -26,6 +28,15 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
+app.use((req, res, next) => {
+  res.locals.message = req.flash("message");
+  res.locals.user = req.user;
+  res.locals.seller = req.seller;
+  next();
+});
 
 // users db
 const users = [];
@@ -39,11 +50,13 @@ const indexRouter = require("./routes/index");
 const userRouter = require("./routes/user");
 const sellerRouter = require("./routes/seller");
 const productRouter = require("./routes/product");
+const cartRouter = require("./routes/cart");
 
 // use routers
 app.use("/", indexRouter);
 app.use("/user", userRouter);
 app.use("/seller", sellerRouter);
 app.use("/product", productRouter);
+app.use("/cart", cartRouter);
 
 app.listen(3000);

@@ -21,6 +21,11 @@
     "mongoose": "^8.2.2",
     "mongoose-type-email": "^1.1.2",
     "nodemailer": "^6.9.12",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "express-flash": "^0.0.2"
   }
 }

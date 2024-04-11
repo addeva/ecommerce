@@ -3,14 +3,12 @@ const express = require("express");
 const { v4: uuidv4 } = require("uuid");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
-const moment = require("moment-timezone");
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
 
 // import models
 const User = require("../models/users");
 const Seller = require("../models/sellers");
-
-// router init
-const router = express.Router();
 
 // nodemailer setups
 const transporter = nodemailer.createTransport({
@@ -27,6 +25,49 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// configure passport local strategy
+passport.use(
+  new LocalStrategy(
+    { usernameField: "email" },
+    async (email, password, done) => {
+      try {
+        const user = await User.findOne({ email });
+        if (!user) {
+          return done(null, false, { message: "Incorrect email or password." });
+        }
+        const validPassword = await bcrypt.compare(
+          password,
+          user.hashedPassword
+        );
+        if (!validPassword) {
+          return done(null, false, { message: "Incorrect email or password." });
+        }
+        return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    }
+  )
+);
+
+// Passport 序列化用户
+passport.serializeUser((user, done) => {
+  done(null, user._id);
+});
+
+// Passport 反序列化用户
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error);
+  }
+});
+
+// router init
+const router = express.Router();
+
 // signup a user
 router.get("/signup", (req, res) => {
   res.render("user/signup");
@@ -37,22 +78,22 @@ router.post("/signup", async (req, res) => {
     const { username, email, password } = req.body;
     // redirect to /user/signup if input imcomplete
     if (!username || !email || !password) {
-      req.session.message = "Username, email and password are all required.";
-      req.session.user = { username, email, password };
+      req.flash("message", "Username, email and password are all required.");
+      req.user = { username, email, password };
       return res.redirect("/user/signup");
     }
 
     // redirect to /user/signup if input incorrect
     const user = await User.findOne({ username, email });
     if (!user) {
-      req.session.message = "No such user with the username and email.";
+      req.flash("message", "No such user with the username and email.");
       return res.redirect("/user/signup");
     }
 
     // redirect to /user/login if users try to set their passwords again
     if (user.hashedPassword !== "undefined") {
-      req.session.message = "Password already set.";
-      req.session.user = { username, email };
+      req.flash("message", "Password already set.");
+      req.user = { username, email };
       return res.redirect("/user/login");
     }
 
@@ -61,8 +102,8 @@ router.post("/signup", async (req, res) => {
     user.hashedPassword = hashedPassword;
     user.signupAt = Date.now();
     await user.save();
-    console.log(user);
-    req.session.user = { username, email, password };
+    req.flash("message", "Password set successfully.");
+    req.user = { username, email, password };
     return res.redirect("/user/login");
   } catch (error) {
     console.error(error);
@@ -76,8 +117,10 @@ router.post("/verify", async (req, res) => {
     // check whether username and email are valid
     const { username, email } = req.body;
     if (!username || !email) {
-      req.session.message =
-        "Username and email are required for email verification.";
+      req.flash(
+        "message",
+        "Username and email are required for email verification."
+      );
       return res.redirect("/user/signup");
     }
 
@@ -88,8 +131,11 @@ router.post("/verify", async (req, res) => {
     if (emailRegistered) {
       if (emailRegistered.verified) {
         // email already verified  => password set? redirect /user/login : redirect /user/signup
-        req.session.message = "This email has been verified.";
-        req.session.user = {
+        req.flash(
+          "message",
+          "This email has been verified. You can log in straight forward."
+        );
+        req.user = {
           username: emailRegistered.username,
           email: emailRegistered.email,
         };
@@ -100,7 +146,10 @@ router.post("/verify", async (req, res) => {
       }
       if (emailRegistered.expireAt > Date.now()) {
         // email not verified but link expired => redirect /user/signup and send a new verification email
-        req.session.message = `Verification email has been sent. It's still valid. Please check your email(${emailRegistered.email}).`;
+        req.flash(
+          "message",
+          `Verification email has been sent. It's still valid. Please check your email(${emailRegistered.email}).`
+        );
         return res.redirect("/user/signup");
       }
     }
@@ -150,11 +199,14 @@ router.post("/verify", async (req, res) => {
     }
 
     // redirecrt the user to /user/signup with check mail message
-    req.session.message = `Please check your email (${email}) for verification.`;
+    req.flash(
+      "message",
+      `Please check your email (${email}) for verification.`
+    );
     return res.redirect("/user/signup");
   } catch (error) {
     console.error(error);
-    req.session.message = "Internal sever error.";
+    req.flash("message", "Internal sever error.");
     res.redirect("/user/signup");
   }
 });
@@ -167,14 +219,15 @@ router.get("/verify/:token", async (req, res) => {
     "verification.expireAt": { $gt: Date.now() },
   });
   if (!user) {
-    req.session.message =
-      "Invalid or expired verification link. Please input your username and email again for new verification email.";
+    req.flash(
+      "message",
+      "Invalid or expired verification link. Please input your username and email again for new verification email."
+    );
     return res.redirect("/user/signup");
   }
   user.verified = true;
   await user.save();
-  req.session.user = { username: user.username, email: user.email };
-  req.session.message = null;
+  req.user = { username: user.username, email: user.email };
   res.redirect("/user/signup");
 });
 
@@ -183,43 +236,27 @@ router.get("/login", (req, res) => {
   res.render("user/login");
 });
 
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  // rerender login page if input imcomplete
-  if (!email || !password) {
-    return res.render("user/login", {
-      message: "Email and password are required to log in.",
-    });
+router.post(
+  "/login",
+  passport.authenticate("local", {
+    failureRedirect: "/user/login",
+    failureFlash: true,
+  }),
+  async (req, res) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    user.lastLogin = Date.now();
+    await user.save();
+    req.user = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      isSeller: user.isSeller,
+    };
+    req.flash("message", "Logged in successfully.");
+    res.redirect("/");
   }
-
-  // rerender login page if email incorrect
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.render("user/login", {
-      message: "Email or password incorrect.",
-    });
-  }
-
-  // rerender login page if password incorrect
-  const match = await bcrypt.compare(password, user.hashedPassword);
-  if (!match) {
-    return res.render("user/login", {
-      message: "Email or password incorrect.",
-    });
-  }
-
-  // redirect to / with user info stored in req.session
-  user.lastLogin = Date.now();
-  await user.save();
-  req.session.user = {
-    id: user._id,
-    username: user.username,
-    email,
-    password,
-    isSeller: user.isSeller,
-  };
-  res.redirect("/");
-});
+);
 
 // reset password
 router.get("/resetPassword", (req, res) => {
@@ -318,7 +355,7 @@ router.put("/resetPassword", async (req, res) => {
   const hashedNewPassword = await bcrypt.hash(newPassword, 10);
   user.hashedPassword = hashedNewPassword;
   await user.save();
-  req.session.user = { username: user.username, email, password: newPassword };
+  req.user = { username: user.username, email, password: newPassword };
   return res.redirect("/user/login");
 });
 
@@ -330,27 +367,19 @@ router.get("/resetPassword/:token", async (req, res) => {
     "resetPassword.expireAt": { $gt: Date.now() },
   });
   if (!user) {
-    req.session.message =
-      "Invalid or expired password reset link. Enter email and get a new one.";
+    req.flash(
+      "message",
+      "Invalid or expired password reset link. Enter email and get a new one."
+    );
     return res.redirect("/user/resetPassword");
   }
   res.render("user/resetPassword", { user: { email: user.email } });
 });
 
-router.get("/logout", async (req, res) => {
-  // update user.lastLogout before logout
-  try {
-    const user = await User.findOne({ email: req.session.user.email });
-    user.lastLogout = Date.now();
-    await user.save();
-  } catch (error) {
-    console.error(error);
-  }
-
-  // destroy session and redirect to previous page
-  req.session.destroy((error) => {
+router.get("/logout", (req, res, next) => {
+  req.logout((error) => {
     if (error) {
-      console.error("Error logging out: ", error);
+      return next(error);
     }
   });
   res.redirect("/");
@@ -358,15 +387,15 @@ router.get("/logout", async (req, res) => {
 
 // user profile
 router.get("/:id", async (req, res) => {
-  if (!req.session.user) {
-    req.session.message = "Please log in.";
+  if (!req.user) {
+    req.flash("message", "Please log in first.");
     return res.redirect("/user/login");
   }
   try {
     const { id } = req.params;
     const user = await User.findById(id);
     if (!user) {
-      req.session.message = "Invalid user id.";
+      req.flash("message", "Invalid user id.");
       return res.redirect("/user/login");
     }
     res.render("user/profile", {
@@ -379,7 +408,7 @@ router.get("/:id", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    req.session.message = "Error retrieving user profile.";
+    req.flash("message", "Error retrieving user profile.");
     res.redirect("/user/login");
   }
 });
