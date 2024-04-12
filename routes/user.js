@@ -58,7 +58,7 @@ passport.serializeUser((user, done) => {
 // Passport 反序列化用户
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(id).select("_id username email isSeller");
     done(null, user);
   } catch (error) {
     done(error);
@@ -247,12 +247,6 @@ router.post(
     const user = await User.findOne({ email });
     user.lastLogin = Date.now();
     await user.save();
-    req.user = {
-      id: user._id,
-      username: user.username,
-      email: user.email,
-      isSeller: user.isSeller,
-    };
     req.flash("message", "Logged in successfully.");
     res.redirect("/");
   }
@@ -382,6 +376,10 @@ router.get("/logout", (req, res, next) => {
       return next(error);
     }
   });
+  delete req.user;
+  delete res.locals.user;
+  res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.set("Pragma", "no-cache");
   res.redirect("/");
 });
 
