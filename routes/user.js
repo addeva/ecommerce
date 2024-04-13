@@ -371,15 +371,9 @@ router.get("/resetPassword/:token", async (req, res) => {
 });
 
 router.get("/logout", (req, res, next) => {
-  req.logout((error) => {
-    if (error) {
-      return next(error);
-    }
+  req.logOut((error) => {
+    if (error) return next(error);
   });
-  delete req.user;
-  delete res.locals.user;
-  res.set("Cache-Control", "no-cache, no-store, must-revalidate");
-  res.set("Pragma", "no-cache");
   res.redirect("/");
 });
 
