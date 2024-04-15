@@ -51,6 +51,7 @@ const userRouter = require("./routes/user");
 const sellerRouter = require("./routes/seller");
 const productRouter = require("./routes/product");
 const cartRouter = require("./routes/cart");
+const checkoutRouter = require("./routes/checkout");
 
 // use routers
 app.use("/", indexRouter);
@@ -58,5 +59,6 @@ app.use("/user", userRouter);
 app.use("/seller", sellerRouter);
 app.use("/product", productRouter);
 app.use("/cart", cartRouter);
+app.use("/checkout", checkoutRouter);
 
 app.listen(3000);
