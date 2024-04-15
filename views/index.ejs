@@ -49,6 +49,10 @@
           <div class="product-title"><%= product.title %></div>
         </div>
       </a>
+      <form action="/cart" method="POST">
+        <input type="hidden" value="<%= product._id %>" name="productId">
+        <button type="submit" class="btn-add">Add To Cart</button>
+      </form>
     </li>%>
     <% } %>
   </ul>

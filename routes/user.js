@@ -9,6 +9,7 @@ const LocalStrategy = require("passport-local").Strategy;
 // import models
 const User = require("../models/users");
 const Seller = require("../models/sellers");
+const Cart = require("../models/carts");
 
 // nodemailer setups
 const transporter = nodemailer.createTransport({
@@ -73,44 +74,6 @@ router.get("/signup", (req, res) => {
   res.render("user/signup");
 });
 
-router.post("/signup", async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
-    // redirect to /user/signup if input imcomplete
-    if (!username || !email || !password) {
-      req.flash("message", "Username, email and password are all required.");
-      req.user = { username, email, password };
-      return res.redirect("/user/signup");
-    }
-
-    // redirect to /user/signup if input incorrect
-    const user = await User.findOne({ username, email });
-    if (!user) {
-      req.flash("message", "No such user with the username and email.");
-      return res.redirect("/user/signup");
-    }
-
-    // redirect to /user/login if users try to set their passwords again
-    if (user.hashedPassword !== "undefined") {
-      req.flash("message", "Password already set.");
-      req.user = { username, email };
-      return res.redirect("/user/login");
-    }
-
-    // Update the hashedPassword property if user exists
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user.hashedPassword = hashedPassword;
-    user.signupAt = Date.now();
-    await user.save();
-    req.flash("message", "Password set successfully.");
-    req.user = { username, email, password };
-    return res.redirect("/user/login");
-  } catch (error) {
-    console.error(error);
-    return res.redirect("/");
-  }
-});
-
 // email verification
 router.post("/verify", async (req, res) => {
   try {
@@ -130,19 +93,23 @@ router.post("/verify", async (req, res) => {
     // check whether there's such user with the email in the collection
     if (emailRegistered) {
       if (emailRegistered.verified) {
-        // email already verified  => password set? redirect /user/login : redirect /user/signup
-        req.flash(
-          "message",
-          "This email has been verified. You can log in straight forward."
-        );
-        req.user = {
+        // email already verified  => password set? redirect /user/login : redirect /user/setPassword
+        res.locals.user = {
           username: emailRegistered.username,
           email: emailRegistered.email,
         };
         if (emailRegistered.hashedPassword !== "undefined") {
+          req.flash(
+            "message",
+            "This email has been verified. You can log in straight forward."
+          );
           return res.redirect("/user/login");
         }
-        return res.redirect("/user/signup");
+        req.flash(
+          "message",
+          "This email has been verified. You can set password straight forward."
+        );
+        return res.redirect("/user/setPassword");
       }
       if (emailRegistered.expireAt > Date.now()) {
         // email not verified but link expired => redirect /user/signup and send a new verification email
@@ -227,8 +194,52 @@ router.get("/verify/:token", async (req, res) => {
   }
   user.verified = true;
   await user.save();
-  req.user = { username: user.username, email: user.email };
-  res.redirect("/user/signup");
+  res.locals.user = {
+    id: user._id,
+    username: user.username,
+    email: user.email,
+  };
+  res.render("user/setPassword", { user: res.locals.user });
+});
+
+// set password
+router.post("/setPassword", async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    // redirect to /user/signup if input imcomplete
+    if (!username || !email || !password) {
+      req.flash("message", "Username, email and password are all required.");
+      res.locals.user = { username, email, password };
+      return res.redirect("/user/setPassword");
+    }
+
+    // redirect to /user/signup if input incorrect
+    const user = await User.findOne({ username, email });
+    if (!user) {
+      req.flash("message", "No such user with the username and/or email.");
+      return res.redirect("/user/setPassword");
+    }
+
+    // redirect to /user/login if users try to set their passwords again
+    if (user.hashedPassword !== "undefined") {
+      req.flash("message", "Password already set.");
+      req.user = { username, email };
+      return res.redirect("/user/login");
+    }
+
+    // Update the hashedPassword property if user exists
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.hashedPassword = hashedPassword;
+    user.signupAt = Date.now();
+    await user.save();
+    Cart.create({ user: user._id });
+    req.flash("message", "Password set successfully.");
+    req.user = { username, email, password };
+    return res.redirect("/user/login");
+  } catch (error) {
+    console.error(error);
+    return res.redirect("/");
+  }
 });
 
 // login a user
