@@ -5,6 +5,7 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const checkAuth = require("../middleware/checkAuth");
 
 // import models
 const User = require("../models/users");
@@ -381,39 +382,17 @@ router.get("/resetPassword/:token", async (req, res) => {
   res.render("user/resetPassword", { user: { email: user.email } });
 });
 
+// user profile
+router.get("/profile", checkAuth, (req, res) => {
+  res.render("user/profile");
+});
+
+// logout
 router.get("/logout", (req, res, next) => {
   req.logOut((error) => {
     if (error) return next(error);
   });
   res.redirect("/");
-});
-
-// user profile
-router.get("/:id", async (req, res) => {
-  if (!req.user) {
-    req.flash("message", "Please log in first.");
-    return res.redirect("/user/login");
-  }
-  try {
-    const { id } = req.params;
-    const user = await User.findById(id);
-    if (!user) {
-      req.flash("message", "Invalid user id.");
-      return res.redirect("/user/login");
-    }
-    res.render("user/profile", {
-      user: {
-        id,
-        username: user.username,
-        email: user.email,
-        isSeller: user.isSeller,
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    req.flash("message", "Error retrieving user profile.");
-    res.redirect("/user/login");
-  }
 });
 
 module.exports = router;
