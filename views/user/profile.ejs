@@ -1,0 +1,15 @@
+<div>
+    <label for="username">Username: </label>
+    <div id="username"><%= user.username %></div>
+</div>
+<div>
+    <label for="email">Email: </label>
+    <div id="email"><%= user.email %></div>
+</div>
+<% if(user.isSeller){ %>
+    <div><a href="../seller/<%= user.id %>">My Seller Profile</a></div> 
+<% } else { %>
+    <div>
+        <a href="../seller/create/<%= user.id %>">Apply seller authorization</a>
+    </div>
+<% } %>

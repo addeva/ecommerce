@@ -1,0 +1,14 @@
+<div class="page-header">Seller Profile</div>
+<div>User Name: <%= seller.user.username %></div>
+<div>Email: <%= seller.user.email %></div>
+<div>Company Name: <%= seller.companyName %></div>
+<div>Company GUI Number: <%= seller.companyGUInumber %></div>
+
+<% if (typeof user !== 'undefined' && user.id === seller.user._id.toString()) { %>
+  <div>Company Bank Code: <%= seller.companyBankCode %></div>
+  <div>Company Bank Account: <%= seller.companyBankAccount %></div>
+<% } %>
+
+<% if (typeof message !== 'undefined') { %>
+  <h3><%= message %></h3>
+<% } %>

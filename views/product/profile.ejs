@@ -1,0 +1,19 @@
+<% if (typeof message !== 'undefined') { %>
+    <h3><%= message %></h3>
+    <% } %>
+
+<div><%= product.title %></div>
+<div><%= product.price %></div>
+<div><a href="/seller/<%= product.seller.user %>"><%= product.seller.companyName %></a></div>
+<div>
+    <form action="/cart" method="POST">
+        <input type="hidden" value="<%= product._id %>" name="productId">
+        <button type="submit">Add to Cart</button>
+    </form>
+    <form action="/tracklist" method="POST">
+        <input type="hidden" value="<%= product._id %>" name="productId">
+        <button type="submit">Add to Tracklist</button>
+    </form>
+</div>
+<img src="<%= product.img_url %>" alt="Image of <%= product.title %>">
+<div><%= product.description %></div>
