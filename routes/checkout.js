@@ -11,6 +11,7 @@ const User = require("../models/users");
 // router init
 const router = express.Router();
 
+// checkout
 router.post("/", checkAuth, async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id })
     .populate({
@@ -18,7 +19,6 @@ router.post("/", checkAuth, async (req, res) => {
       select: "title price",
     })
     .exec();
-  console.log(cart);
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -44,7 +44,7 @@ router.post("/", checkAuth, async (req, res) => {
   }
 });
 
-router.get("/success", async (req, res) => {
+router.get("/success", checkAuth, async (req, res) => {
   // Clear cart products if payment succeeds
   await Cart.updateOne({ user: req.user._id }, { $set: { products: [] } });
   // Handle any additional logic after successful payment
