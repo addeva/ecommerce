@@ -1,8 +1,6 @@
 const Cart = require("../../models/carts");
 const Product = require("../../models/products");
 
-const cartId = 
-
 const cart = Cart.findById()
 
 document.querySelectorAll(".btn_add").forEach((btn) => {

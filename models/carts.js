@@ -14,7 +14,6 @@ const cartSchema = new mongoose.Schema({
         ref: "Product",
       },
       quantity: { type: Number, required: true, default: 1 },
-      checkout: { type: Boolean, required: true, default: true },
     },
   ],
 });

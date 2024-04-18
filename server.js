@@ -11,6 +11,7 @@ const session = require("express-session");
 const passport = require("passport");
 const methodOverride = require("method-override");
 const flash = require("express-flash");
+const path = require("path");
 
 // app setups
 const app = express();
@@ -19,6 +20,7 @@ app.set("views", __dirname + "/views");
 app.set("layout", "layouts/layout");
 app.use(expressLayouts);
 app.use(express.static("public"));
+// app.use(express.static(path.join(__dirname, "dist")));
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride("_method"));
 app.use(

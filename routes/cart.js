@@ -25,9 +25,7 @@ router.get("/", checkAuth, async (req, res) => {
   }
   let total = 0;
   for (product of cart.products) {
-    if (product.checkout) {
-      total += product.product.price * product.quantity;
-    }
+    total += product.product.price * product.quantity;
   }
   res.render("cart/index", { cart, total });
 });

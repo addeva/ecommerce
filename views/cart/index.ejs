@@ -6,7 +6,6 @@
 
 <% for (product of cart.products){ %>
 <div class="cart-row">
-  <input type="checkbox" <% if (product.checkout) { %> checked <% } %>>
   <span><%= product.product.title %>,</span>
   <form action="/cart?_method=PUT" method="POST">
     <input type="hidden" value="<%= product.product._id %>" name="productId">
@@ -26,7 +25,11 @@
 <br>
 <% } %>
 
+<% if(total > 0){ %>
 <div class="cart-row">
-  <span>Total: $<%= total %></span>
-  <button> <a href="/checkout">Checkout</a></button>
+  <span>Total: $<span><%= total %></span></span>
+  <form action="/checkout" method="POST">
+    <button type="submit">Checkout</button>
+  </form>
 </div>
+<% } %>
