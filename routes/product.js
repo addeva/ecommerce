@@ -1,31 +1,27 @@
-// router init
+// import modules
 const express = require("express");
-const router = express.Router();
+const checkAuth = require("../middleware/checkAuth");
 
 // import models
 const User = require("../models/users");
 const Seller = require("../models/sellers");
 const Product = require("../models/products");
 
+// router init
+const router = express.Router();
+
 // create a product
-router.get("/create", async (req, res) => {
-  if (!req.user) {
-    req.flash("message", "Please log in first.");
-    return res.redirect("/user/login");
-  }
+router.get("/create", checkAuth, async (req, res) => {
   const user = await User.findOne({ email: req.user.email });
   const seller = await Seller.findOne({ user: user._id });
   if (!seller) {
     return res.status(403).send("Unauthorized user.");
   }
-  return res.render("product/create", { user, seller });
+  const product = await Product.create({ seller: seller._id });
+  return res.render("product/create", { user, seller, product });
 });
 
-router.post("/create", async (req, res) => {
-  if (!req.user) {
-    req.flash("message", "Please log in first.");
-    return res.redirect("/user/login");
-  }
+router.post("/create", checkAuth, async (req, res) => {
   const user = await User.findOne({ email: req.user.email });
   const seller = await Seller.findOne({ user: user._id });
   const {
@@ -69,9 +65,21 @@ router.get("/:id", async (req, res) => {
 });
 
 // update a product
-router.patch("/:id/update", (req, res) => {});
+router.get("/update/:id", checkAuth, async (req, res) => {
+  const { id } = req.params;
+  const product = await Product.findById(id).populate("seller").exec();
+  const seller = product.seller;
+  if (!product) {
+    return res.render("product/profile", { message: "Product doesn't exist." });
+  }
+  res.render("product/update", { product, seller });
+});
+
+router.put("/update/:id", checkAuth, async (req, res) => {
+  const { id } = req.params;
+});
 
 // delete a product
-router.delete("/:id/delete", (req, res) => {});
+router.delete("/:id/delete", checkAuth, (req, res) => {});
 
 module.exports = router;

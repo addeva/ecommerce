@@ -1,15 +1,41 @@
-<% if (typeof message !== 'undefined') { %>
-    <h3><%= message %></h3>
-    <% } %>
+<%- include('../partials/message') %>
 
-<div><%= product.title %></div>
-<div><%= product.price %></div>
-<div><a href="/seller/<%= product.seller.user %>"><%= product.seller.companyName %></a></div>
-<div>
+<% if(product.inventory){ %>
+<div class="product-profile-container">
+  <img class="product-img" src="<%= product.img_url %>">
+  <div class="product-info">
+    <div class="product-price">$<%= product.price %></div>
+    <div class="product-title"><%= product.title %></div>
+    <div><a href="/seller/<%= product.seller.user %>"><%= product.seller.companyName %></a></div>
     <form action="/cart" method="POST">
-        <input type="hidden" value="<%= product._id %>" name="productId">
-        <button type="submit">Add to Cart</button>
+      <input type="hidden" value="<%= product._id %>" name="productId">
+      <button type="submit">Add to Cart</button>
     </form>
+    <div><%= product.description %></div>
+  </div>
 </div>
-<img src="<%= product.img_url %>" alt="Image of <%= product.title %>">
-<div><%= product.description %></div>
+<% } else { %>
+<div class="product-profile-container">
+  <img class="product-img soldout" src="<%= product.img_url %>" alt="Image of <%= product.title %>">
+  <div class="product-info">
+    <div>Currently Soldout.</div>
+    <br>
+    <div class="product-price soldout">$<%= product.price %></div>
+    <div class="product-title soldout"><%= product.title %></div>
+    <div class="soldout"><a href="/seller/<%= product.seller.user %>"><%= product.seller.companyName %></a></div>
+    <div class="soldout"><%= product.description %></div>
+  </div>
+</div>
+<% } %>
+
+<% if(typeof user !== "undefined" ){ %>
+<div>
+  user._id: <%= user._id %><br>
+  type: <%= typeof user._id %>
+</div>
+<div>
+  product.seller.user: <%= product.seller.user %>
+  type: <%= typeof product.seller.user %>
+</div>
+<button><a href="/product/update/<%= product._id %>">Update Product Info</a></button>
+<% } %>

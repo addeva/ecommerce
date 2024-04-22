@@ -46,10 +46,24 @@ router.post("/", checkAuth, async (req, res) => {
       break;
     }
   }
+  // if the product already in user's cart ->
+  //    adjust quantity if inventory > quantity else show message
   if (existingProductIndex > -1) {
-    cart.products[existingProductIndex].quantity += 1;
+    if (product.inventory > cart.products[existingProductIndex].quantity) {
+      cart.products[existingProductIndex].quantity += 1;
+    } else {
+      req.flash("message", "Inventory Shortage.");
+      return res.redirect("/");
+    }
+    // product not in user's cart ->
+    //    push product to user's cart if inventory > 0 else show message
   } else {
-    cart.products.push({ product: id, quantity: 1 });
+    if (product.inventory) {
+      cart.products.push({ product: id, quantity: 1 });
+    } else {
+      req.flash("message", "Inventory Shortage.");
+      return res.redirect("/");
+    }
   }
   await cart.save();
 
@@ -60,12 +74,19 @@ router.post("/", checkAuth, async (req, res) => {
 router.put("/", async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id });
   const { productId, action } = req.body;
+  const product = await Product.findById(productId);
   for (let i = 0; i < cart.products.length; i++) {
     if (cart.products[i].product.toString() === productId) {
       switch (action) {
         case "increment":
-          cart.products[i].quantity += 1;
-          break;
+          // adjust quantity if inventory > quantity else show message
+          if (product.inventory > cart.products[i].quantity) {
+            cart.products[i].quantity += 1;
+            break;
+          } else {
+            req.flash("message", "Inventory Shortage.");
+            return res.redirect("/cart");
+          }
         case "decrement":
           cart.products[i].quantity -= 1;
           break;

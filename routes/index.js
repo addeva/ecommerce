@@ -26,13 +26,6 @@ router.get("/", async (req, res) => {
   if (req.params.category) {
     searchOptions.category = req.params.category;
   }
-
-  if (req.session.user) {
-    return res.render("index", {
-      user: req.session.user,
-      products,
-    });
-  }
   res.render("index", { products });
 });
 

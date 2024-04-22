@@ -33,6 +33,4 @@
   <button type="submit">Apply</button>
 </form>
 
-<% if (typeof message !== 'undefined') { %>
-<h3><%= message %></h3>
-<% } %>
+<%- include('../partials/message') %>

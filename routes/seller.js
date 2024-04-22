@@ -5,6 +5,7 @@ const router = express.Router();
 // import models
 const User = require("../models/users");
 const Seller = require("../models/sellers");
+const Product = require("../models/products");
 
 // create a seller
 router.get("/create/:id", async (req, res) => {
@@ -88,8 +89,10 @@ router.get("/:id", async (req, res) => {
       message: "Seller doesn't exist.",
     });
   }
+  const products = await Product.find({ seller: seller._id });
   res.render("seller/profile", {
     seller,
+    products,
   });
 });
 

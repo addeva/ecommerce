@@ -5,12 +5,7 @@
 <div class="page-header">Hello world.</div>
 <% } %>
 
-<!-- if message: show message -->
-<% if (typeof message !== 'undefined') { %>
-<div>
-  <h3><%= message %></h3>
-</div>
-<% } %>
+<%- include('partials/message') %>
 
 <!-- sort by -->
 <div class="sort-by-container">
@@ -35,27 +30,4 @@
   <div><button type="submit">Search</button></div>
 </form>
 
-<!-- show products -->
-<div class="product-list-container">
-  <ul class="product-list">
-    <% for (product of products) { %>
-    <li class="product">
-      <a href="/product/<%= product._id %>">
-        <div class="product-img-container">
-          <img class="product-img" src="<%= product.img_url %>">
-        </div>
-        <div class="product-info">
-          <div class="product-price">$<%= product.price %></div>
-          <div class="product-title"><%= product.title %></div>
-        </div>
-      </a>
-      <form action="/cart" method="POST">
-        <input type="hidden" value="<%= product._id %>" name="productId">
-        <button type="submit" class="btn-add">Add To Cart</button>
-      </form>
-    </li>%>
-    <% } %>
-  </ul>
-</div>
-
-<!-- <script src="/javascripts/sortBy.js"></script> -->
+<%- include('./partials/products', { products }) %>

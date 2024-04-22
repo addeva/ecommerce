@@ -6,14 +6,18 @@
     --secondary-color: #56d2c2; 
     --page-header-font-size: 1.5rem;
     --page-header-font-weight: 700;
+    --sub-page-header-font-size: 1.2rem;
+    --sub-page-header-font-weight: 600;
     --product-div-width: 18%;
-    --product-div-height: 18%;
-    --product-img-container-height: 150px;
+    --product-div-height: 13%;
+    --product-img-container-height: 30%;
     --product-info-height: calc(var(--product-div-height) - var(--product-img-container-height));
     --product-price-font-size: 1.2rem;
     --product-price-font-weight: 700;
     --product-title-font-size: 1rem;
     --product-title-font-weight: 600;
+    --soldout-product-img-opacity: 60%;
+    --soldout-text-color: #A0A0A0;
 }
 
 a, a:hover, a:visited {
@@ -62,7 +66,6 @@ header {
 
 .user-link-container li {
     margin-left: .1rem;
-
     :last-child {
         margin-right: 2rem;
     }
@@ -78,6 +81,13 @@ li {
     margin: 1rem 2rem 1rem;
 }
 
+.sub-page-header {
+    font-size: var(--sub-page-header-font-size);
+    font-weight: var(--sub-page-header-font-weight);
+    margin: 1.5rem auto 0.5rem;
+    text-align: center;
+}
+
 .sort-by-container {
     text-align: right;
     justify-self: end;
@@ -88,14 +98,14 @@ li {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    /* Add additional styling as needed */
 }
 
 .product-list-container {
-    margin: 1rem auto;
+    margin: 0 auto;
 }
 
 .product-list {
+    margin: 0 auto;
     display: flex;
     flex-wrap: wrap;
     text-align: center;
@@ -115,30 +125,29 @@ li {
     width: 90%;
     height: var(--product-img-container-height);
     margin: 0 auto;
-    /* Center horizontally */
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Center vertically */
     justify-content: center;
-    /* Center horizontally */
     padding: auto;
 }
 
-.product-img {
+.product-img-thumbnail {
     width: 100%;
-    /* Set width to 100% */
     height: auto;
-    /* Maintain aspect ratio */
     max-height: 100%;
-    /* Limit height to container height */
+}
+
+.product-img {
+    max-width: 50%;
+    max-height: 70%;
 }
 
 .product-info {
     height: var(--product-info-height);
     display: flex;
     flex-direction: column;
-    margin: 1rem 0 0;
+    margin: 0.6rem 0 0;
 }
 
 .product-price {
@@ -153,6 +162,31 @@ li {
     text-align: left;
     font-size: var(--product-title-font-size);
     font-weight: var(--product-title-weight-font-size);
+}
+
+.soldout {
+    filter: opacity(var(--soldout-product-img-opacity));
+    color: var(--soldout-text-color);
+}
+
+.product-profile-container {
+    display:flex;
+    align-content: space-between;
+    justify-content: center;
+}
+
+.product-profile-container > img {
+    min-width: 30%;
+    max-width: 50%;
+    min-height: 30%;
+    max-height: 70%;
+    margin: 3rem 1rem auto 2rem;
+}
+
+.product-profile-container > div {
+    min-width: 30%;
+    max-width: 60%;
+    margin: 3rem 4rem auto 1rem;
 }
 
 .cart-row {

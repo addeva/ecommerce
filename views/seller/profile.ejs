@@ -9,6 +9,7 @@
   <div>Company Bank Account: <%= seller.companyBankAccount %></div>
 <% } %>
 
-<% if (typeof message !== 'undefined') { %>
-  <h3><%= message %></h3>
-<% } %>
+<div class="sub-page-header">Products of This Seller</div>
+<%- include('../partials/products', { products }) %>
+
+<%- include('../partials/message') %>

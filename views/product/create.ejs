@@ -8,7 +8,6 @@
     <label for="companyName">Company Name: </label>
     <input type="text" disabled value="<%= seller.companyName %>" id="companyName" name="companyName" required>
   </div>
-
   <!-- input product info -->
   <div>
     <label for="title">Product Name: </label>
@@ -24,7 +23,7 @@
   </div>
   <div>
     <label for="description">Product Description: </label>
-    <input type="text" id="description" name="description">
+    <textarea type="text" id="description" name="description"></textarea>
   </div>
   <div>
     <label for="inventory">Current Inventory: </label>
@@ -33,6 +32,4 @@
   <button type="submit">Post</button>
 </form>
 
-<% if (typeof message !== 'undefined') { %>
-<h3><%= message %></h3>
-<% } %>
+<%- include('../partials/message') %>
