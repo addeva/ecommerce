@@ -12,46 +12,32 @@ const router = express.Router();
 
 // create a product
 router.get("/create", checkAuth, async (req, res) => {
-  const user = await User.findOne({ email: req.user.email });
-  const seller = await Seller.findOne({ user: user._id });
-  if (!seller) {
-    return res.status(403).send("Unauthorized user.");
-  }
-  const product = await Product.create({ seller: seller._id });
-  return res.render("product/create", { user, seller, product });
+  const seller = await Seller.findOne({ user: req.user._id });
+  const product = new Product({ seller: seller._id });
+  return res.render("product/create", { seller, product });
 });
 
 router.post("/create", checkAuth, async (req, res) => {
-  const user = await User.findOne({ email: req.user.email });
-  const seller = await Seller.findOne({ user: user._id });
-  const {
-    sellerId,
-    companyName,
-    title,
-    price,
-    img_url,
-    description,
-    inventory,
-  } = req.body;
-  if (!sellerId || !companyName || !title || !price || !img_url || !inventory) {
+  const seller = await Seller.findOne({ user: req.user._id });
+  const product = new Product({
+    seller: req.body.sellerId,
+    title: req.body.title,
+    price: req.body.price,
+    img_url: req.body.img_url,
+    description: req.body.description,
+    inventory: req.body.inventory,
+  });
+  try {
+    await product.save();
+    return res.redirect(`/product/${product._id}`);
+  } catch (error) {
+    console.error(error);
     return res.render("product/create", {
-      user,
       seller,
-      message: "Please fill out all inputs with a *.",
+      product,
+      message: "All inputs with * are required.",
     });
   }
-  const product = await Product.create({
-    seller: sellerId,
-    companyName,
-    title,
-    price,
-    img_url,
-    description,
-    inventory,
-  });
-  req.user = user;
-  req.seller = seller;
-  res.redirect(`/product/${product._id}`);
 });
 
 // read a product
