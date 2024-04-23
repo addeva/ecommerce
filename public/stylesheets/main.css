@@ -8,9 +8,9 @@
     --page-header-font-weight: 700;
     --sub-page-header-font-size: 1.2rem;
     --sub-page-header-font-weight: 600;
-    --product-div-width: 18%;
+    --product-div-width: 20%;
     --product-div-height: 13%;
-    --product-img-container-height: 30%;
+    --product-img-container-height: 175px;
     --product-info-height: calc(var(--product-div-height) - var(--product-img-container-height));
     --product-price-font-size: 1.2rem;
     --product-price-font-weight: 700;

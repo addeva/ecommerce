@@ -13,7 +13,7 @@ const router = express.Router();
 // create a product
 router.get("/create", checkAuth, async (req, res) => {
   const seller = await Seller.findOne({ user: req.user._id });
-  const product = new Product({ seller: seller._id });
+  const product = new Product();
   return res.render("product/create", { seller, product });
 });
 
@@ -30,8 +30,7 @@ router.post("/create", checkAuth, async (req, res) => {
   try {
     await product.save();
     return res.redirect(`/product/${product._id}`);
-  } catch (error) {
-    console.error(error);
+  } catch {
     return res.render("product/create", {
       seller,
       product,
@@ -63,6 +62,22 @@ router.get("/update/:id", checkAuth, async (req, res) => {
 
 router.put("/update/:id", checkAuth, async (req, res) => {
   const { id } = req.params;
+  try {
+    const product = await Product.findByIdAndUpdate(id, {
+      $set: {
+        seller: req.body.sellerId,
+        title: req.body.title,
+        price: req.body.price,
+        img_url: req.body.img_url,
+        description: req.body.description,
+        inventory: req.body.inventory,
+      },
+    });
+    return res.redirect(`/product/${product._id}`);
+  } catch (error) {
+    console.error(error);
+    return res.render("product/update", { product, seller: product.seller });
+  }
 });
 
 // delete a product

@@ -1,34 +1,6 @@
 <div class="page-header">Put on New Product</div>
 <form action="/product/create" method="POST">
-  <!-- Hidden input fields -->
-  <input type="hidden" value="<%= seller._id %>" name="sellerId" required>
-  <input type="hidden" value="<%= seller.companyName %>" name="companyName" required>
-  <!-- Display companyName -->
-  <div>
-    <label for="companyName">Company Name: </label>
-    <input type="text" disabled value="<%= seller.companyName %>" id="companyName" name="companyName" required>
-  </div>
-  <!-- input product info -->
-  <div>
-    <label for="title">Product Name: </label>
-    <input type="text" value="<%= product.title %>" id="title" name="title" required>
-  </div>
-  <div>
-    <label for="price">Product Price: </label>
-    <input type="number" value="<%= product.price %>" id="price" name="price" min="1" required>
-  </div>
-  <div>
-    <label for="img_url">Product Image URL: </label>
-    <input type="text" value="<%= product.img_url %>" id="img_url" name="img_url" required>
-  </div>
-  <div>
-    <label for="description">Product Description: </label>
-    <textarea type="text" value="<%= product.description %>" id="description" name="description"></textarea>
-  </div>
-  <div>
-    <label for="inventory">Current Inventory: </label>
-    <input type="number" value="<%= product.inventory %>" id="inventory" name="inventory" required>
-  </div>
+  <%- include("_formFields") %>
   <button type="submit">Post</button>
 </form>
 
