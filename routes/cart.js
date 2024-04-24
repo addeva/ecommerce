@@ -52,7 +52,10 @@ router.post("/", checkAuth, async (req, res) => {
     if (product.inventory > cart.products[existingProductIndex].quantity) {
       cart.products[existingProductIndex].quantity += 1;
     } else {
-      req.flash("message", "Inventory Shortage.");
+      req.flash(
+        "message",
+        `Inventory Shortage. Can't add more ${product.title} to cart.`
+      );
       return res.redirect("/");
     }
     // product not in user's cart ->
@@ -61,7 +64,10 @@ router.post("/", checkAuth, async (req, res) => {
     if (product.inventory) {
       cart.products.push({ product: id, quantity: 1 });
     } else {
-      req.flash("message", "Inventory Shortage.");
+      req.flash(
+        "message",
+        `Inventory Shortage. Can't add more ${product.title} to cart.`
+      );
       return res.redirect("/");
     }
   }
@@ -71,7 +77,7 @@ router.post("/", checkAuth, async (req, res) => {
   res.redirect("/");
 });
 
-router.put("/", async (req, res) => {
+router.put("/", checkAuth, async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id });
   const { productId, action } = req.body;
   const product = await Product.findById(productId);
@@ -84,7 +90,10 @@ router.put("/", async (req, res) => {
             cart.products[i].quantity += 1;
             break;
           } else {
-            req.flash("message", "Inventory Shortage.");
+            req.flash(
+              "message",
+              `Inventory Shortage. Can't add more ${product.title} to cart.`
+            );
             return res.redirect("/cart");
           }
         case "decrement":
@@ -101,7 +110,7 @@ router.put("/", async (req, res) => {
   res.redirect("/cart");
 });
 
-router.delete("/", async (req, res) => {
+router.delete("/", checkAuth, async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id });
   const { productId } = req.body;
   for (let i = 0; i < cart.products.length; i++) {

@@ -27,7 +27,7 @@ router.post("/", checkAuth, async (req, res) => {
     const inventory = product.product.inventory;
     if (product.quantity > inventory) {
       product.quantity = inventory;
-      message += `${product.product.title} is currently low in inventory. You can buy at most ${inventory} one(s) now.`;
+      message += `Inventory Shortage. You can buy at most ${inventory} ${product.product.title}(s) now.`;
       await cart.save();
     }
   }

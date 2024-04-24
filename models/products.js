@@ -8,7 +8,16 @@ const productSchema = new mongoose.Schema({
     required: true,
     ref: "Seller",
   },
-  img_url: { type: String, required: true },
+  img_url: {
+    type: String,
+    required: true,
+    validate: {
+      validator: function (value) {
+        return /^(http|https):\/\/[^ "]+$/.test(value);
+      },
+      message: (props) => `${props.value} is not a valid URL!`,
+    },
+  },
   description: {
     type: String,
   },

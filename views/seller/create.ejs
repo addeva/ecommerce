@@ -1,34 +1,33 @@
 <div class="page-header">Apply Seller Authorization</div>
-<form action="/seller/create/<%=user.id %>" method="POST">
+<form action="/seller/create" method="POST">
+  <!-- Hidden input fields: username, email -->
+  <input type="hidden" value="<%= user.username %>" name="username" required>
+  <input type="hidden" value="<%= user.email %>" name="email" required>
+  <!-- Display username, email -->
   <div>
-    <!-- Hidden input field to store username value -->
-    <input type="hidden" value="<%= user.username %>" name="username" required>
-    <!-- Display username value to the user -->
     <label for="usernameDisplay">User Name: </label>
     <input type="text" disabled value="<%= user.username %>" id="usernameDisplay">
   </div>
   <div>
-    <!-- Hidden input field to store email value -->
-    <input type="hidden" value="<%= user.email %>" name="email" required>
-    <!-- Display email value to the user -->
     <label for="emailDisplay">Email: </label>
     <input type="email" disabled value="<%= user.email %>" id="emailDisplay">
   </div>
-  <div>
+  <!-- input seller info -->
+  <div>  
     <label for="companyName">Company Name: </label>
-    <input type="test" id="companyName" name="companyName" required>
+    <input type="test" value="<%= seller.companyName %>" id="companyName" name="companyName" required>
   </div>
   <div>
     <label for="companyGUInumber">Company GUI Number: </label>
-    <input type="text" id="companyGUInumber" name="companyGUInumber" minlength="8" maxlength="8" required>
+    <input type="text" value="<%= seller.companyGUInumber %>" id="companyGUInumber" name="companyGUInumber" minlength="8" maxlength="8" required>
   </div>
   <div>
     <label for="companyBankCode">Company Bank Code: </label>
-    <input type="text" id="companyBankCode" name="companyBankCode" minlength="3" maxlength="3" required>
+    <input type="text" value="<%= seller.companyBankCode %>" id="companyBankCode" name="companyBankCode" minlength="3" maxlength="3" required>
   </div>
   <div>
     <label for="companyBankAccount">Company Bank Account: </label>
-    <input type="text" id="companyBankAccount" name="companyBankAccount" minlength="14" maxlength="14" required>
+    <input type="text" value="<%= seller.companyBankAccount %>" id="companyBankAccount" name="companyBankAccount" minlength="14" maxlength="14" required>
   </div>
   <button type="submit">Apply</button>
 </form>

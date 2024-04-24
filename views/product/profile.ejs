@@ -2,7 +2,7 @@
 
 <% if(product.inventory){ %>
 <div class="product-profile-container">
-  <img class="product-img" src="<%= product.img_url %>">
+  <img class="product-img" src="<%= product.img_url %>"  alt="<%= product.title %>">
   <div class="product-info">
     <div class="product-price">$<%= product.price %></div>
     <div class="product-title"><%= product.title %></div>
@@ -16,7 +16,7 @@
 </div>
 <% } else { %>
 <div class="product-profile-container">
-  <img class="product-img soldout" src="<%= product.img_url %>" alt="Image of <%= product.title %>">
+  <img class="product-img soldout" src="<%= product.img_url %>" alt="<%= product.title %>">
   <div class="product-info">
     <div>Currently Soldout.</div>
     <br>
@@ -28,14 +28,6 @@
 </div>
 <% } %>
 
-<% if(typeof user !== "undefined" ){ %>
-<div>
-  user._id: <%= user._id %><br>
-  type: <%= typeof user._id %>
-</div>
-<div>
-  product.seller.user: <%= product.seller.user %>
-  type: <%= typeof product.seller.user %>
-</div>
-<button><a href="/product/update/<%= product._id %>">Update Product Info</a></button>
+<% if(typeof user !== "undefined" && user._id.toString() === product.seller.user.toString()){ %>
+    <button><a href="/product/update/<%= product._id %>">Update Product Info</a></button>
 <% } %>

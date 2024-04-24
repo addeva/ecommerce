@@ -10,15 +10,15 @@ const Product = require("../models/products");
 // router init
 const router = express.Router();
 
-// create a product
+// create product
 router.get("/create", checkAuth, async (req, res) => {
-  const seller = await Seller.findOne({ user: req.user._id });
+  const seller = await findSellerByUserId(req.user._id, "Unauthorized.", "/");
   const product = new Product();
   return res.render("product/create", { seller, product });
 });
 
 router.post("/create", checkAuth, async (req, res) => {
-  const seller = await Seller.findOne({ user: req.user._id });
+  const seller = await findSellerByUserId(req.user._id, "Unauthorized.", "/");
   const product = new Product({
     seller: req.body.sellerId,
     title: req.body.title,
@@ -39,48 +39,89 @@ router.post("/create", checkAuth, async (req, res) => {
   }
 });
 
-// read a product
+// read product
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  const product = await Product.findById(id).populate("seller").exec();
-  if (!product) {
-    return res.render("product/profile", { message: "Product doesn't exist." });
+  try {
+    const product = await Product.findById(id).populate("seller").exec();
+    if (!product) {
+      return res.render("product/profile", {
+        message: "Product doesn't exist.",
+      });
+    }
+    res.render("product/profile", { product });
+  } catch (error) {
+    console.error(error);
+    return res.render("product/profile", {
+      message: "Error occurred while fetching product details.",
+    });
   }
-  res.render("product/profile", { product });
 });
 
-// update a product
+// update product
 router.get("/update/:id", checkAuth, async (req, res) => {
+  const seller = await findSellerByUserId(req.user._id, "Unauthorized.", "/");
   const { id } = req.params;
   const product = await Product.findById(id).populate("seller").exec();
-  const seller = product.seller;
   if (!product) {
-    return res.render("product/profile", { message: "Product doesn't exist." });
+    return res.render("product/profile", {
+      message: "Product doesn't exist.",
+    });
+  }
+  if (seller._id.toString() !== product.seller._id.toString()) {
+    return res.render("product/profile", {
+      product,
+      message: "Unauthorized.",
+    });
   }
   res.render("product/update", { product, seller });
 });
 
 router.put("/update/:id", checkAuth, async (req, res) => {
+  const seller = await findSellerByUserId(req.user._id, "Unauthorized.", "/");
   const { id } = req.params;
   try {
-    const product = await Product.findByIdAndUpdate(id, {
-      $set: {
-        seller: req.body.sellerId,
-        title: req.body.title,
-        price: req.body.price,
-        img_url: req.body.img_url,
-        description: req.body.description,
-        inventory: req.body.inventory,
+    // Find the product by its ID and ensure that the seller is authorized to update it
+    const product = await Product.findOneAndUpdate(
+      { _id: id, seller: seller._id },
+      {
+        $set: {
+          title: req.body.title,
+          price: req.body.price,
+          img_url: req.body.img_url,
+          description: req.body.description,
+          inventory: req.body.inventory,
+        },
       },
-    });
+      { new: true } // Return the updated product
+    );
+
+    // If the product doesn't exist or the seller is not authorized, render the appropriate message
+    if (!product) {
+      return res.render("product/profile", {
+        message: "Product doesn't exist or unauthorized.",
+      });
+    }
+
+    // Redirect to the product profile page
     return res.redirect(`/product/${product._id}`);
   } catch (error) {
     console.error(error);
-    return res.render("product/update", { product, seller: product.seller });
+    return res.render("product/update", { message: "An error occurred." });
   }
 });
 
-// delete a product
+// delete product
 router.delete("/:id/delete", checkAuth, (req, res) => {});
+
+// functions
+async function findSellerByUserId(userId, noSellerMessage, redirectPath) {
+  const seller = await Seller.findOne({ user: userId });
+  if (!seller) {
+    req.flash("message", noSellerMessage);
+    return res.redirect(redirectPath);
+  }
+  return seller;
+}
 
 module.exports = router;
