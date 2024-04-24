@@ -12,13 +12,21 @@ const router = express.Router();
 
 // create product
 router.get("/create", checkAuth, async (req, res) => {
-  const seller = await findSellerByUserId(req.user._id, "Unauthorized.", "/");
+  const seller = await Seller.findOne({ user: req.user._id });
+  if (!seller) {
+    req.flash("message", "Unauthorized.");
+    return res.redirect("/");
+  }
   const product = new Product();
   return res.render("product/create", { seller, product });
 });
 
 router.post("/create", checkAuth, async (req, res) => {
-  const seller = await findSellerByUserId(req.user._id, "Unauthorized.", "/");
+  const seller = await Seller.findOne({ user: req.user._id });
+  if (!seller) {
+    req.flash("message", "Unauthorized.");
+    return res.redirect("/");
+  }
   const product = new Product({
     seller: req.body.sellerId,
     title: req.body.title,
@@ -60,7 +68,11 @@ router.get("/:id", async (req, res) => {
 
 // update product
 router.get("/update/:id", checkAuth, async (req, res) => {
-  const seller = await findSellerByUserId(req.user._id, "Unauthorized.", "/");
+  const seller = await Seller.findOne({ user: req.user._id });
+  if (!seller) {
+    req.flash("message", "Unauthorized.");
+    return res.redirect("/");
+  }
   const { id } = req.params;
   const product = await Product.findById(id).populate("seller").exec();
   if (!product) {
@@ -78,7 +90,11 @@ router.get("/update/:id", checkAuth, async (req, res) => {
 });
 
 router.put("/update/:id", checkAuth, async (req, res) => {
-  const seller = await findSellerByUserId(req.user._id, "Unauthorized.", "/");
+  const seller = await Seller.findOne({ user: req.user._id });
+  if (!seller) {
+    req.flash("message", "Unauthorized.");
+    return res.redirect("/");
+  }
   const { id } = req.params;
   try {
     // Find the product by its ID and ensure that the seller is authorized to update it
@@ -113,15 +129,5 @@ router.put("/update/:id", checkAuth, async (req, res) => {
 
 // delete product
 router.delete("/:id/delete", checkAuth, (req, res) => {});
-
-// functions
-async function findSellerByUserId(userId, noSellerMessage, redirectPath) {
-  const seller = await Seller.findOne({ user: userId });
-  if (!seller) {
-    req.flash("message", noSellerMessage);
-    return res.redirect(redirectPath);
-  }
-  return seller;
-}
 
 module.exports = router;

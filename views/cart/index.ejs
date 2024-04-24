@@ -2,36 +2,33 @@
 <div class="page-header">You haven't added anything to your cart yet. <br>
   <a href="/">Go get some!</a>
 </div>
-<% } %>
-
-<% for (product of cart.products){ %>
-<div class="cart-row">
-  <span><%= product.product.title %>,</span>
-  <form action="/cart?_method=PUT" method="POST">
-    <input type="hidden" value="<%= product.product._id %>" name="productId">
-    <button type="submit" class="btn-add" name="action" value="increment">+</button>
-  </form>
-  <span><%= product.quantity %></span>
-  <form action="/cart?_method=PUT" method="POST">
-    <input type="hidden" value="<%= product.product._id %>" name="productId">
-    <button type="submit" class="btn-subtract" name="action" value="decrement">-</button>
-  </form>
-  <span>Unit Price: $<%= product.product.price %></span>
-  <form action="/cart?_method=DELETE" method="POST">
-    <input type="hidden" value="<%= product.product._id %>" name="productId">
-    <button type="submit" class="btn-delete">Delete</button>
-  </form>
-</div>
-<br>
-<% } %>
-
-<% if(total > 0){ %>
-<div class="cart-row">
-  <span>Total: $<span><%= total %></span></span>
-  <form action="/checkout" method="POST">
-    <button type="submit">Checkout</button>
-  </form>
-</div>
+<% } else{ %>
+  <% for (product of cart.products){ %>
+    <div class="cart-row">
+      <span><%= product.product.title %>,</span>
+      <form action="/cart?_method=PUT" method="POST">
+        <input type="hidden" value="<%= product.product._id %>" name="productId">
+        <button type="submit" class="btn-add" name="action" value="increment">+</button>
+      </form>
+      <span><%= product.quantity %></span>
+      <form action="/cart?_method=PUT" method="POST">
+        <input type="hidden" value="<%= product.product._id %>" name="productId">
+        <button type="submit" class="btn-subtract" name="action" value="decrement">-</button>
+      </form>
+      <span>Unit Price: $<%= product.product.price %></span>
+      <form action="/cart?_method=DELETE" method="POST">
+        <input type="hidden" value="<%= product.product._id %>" name="productId">
+        <button type="submit" class="btn-delete">Delete</button>
+      </form>
+    </div>
+    <br>
+    <% } %>
+    <% if(total > 0){ %>
+      <div class="cart-row">
+        <span>Total: $<span><%= total %></span></span>
+        <button type="submit"><a href="/checkout">Checkout</a></button>
+      </div>
+    <% } %>
 <% } %>
 
 <%- include('../partials/message') %>

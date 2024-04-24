@@ -74,10 +74,7 @@ router.get("/:id", async (req, res) => {
   });
 });
 
-// update a seller
-router.patch("/update/:id", (req, res) => {});
-
 // delete a seller
-router.delete("/delete/:id", (req, res) => {});
+router.delete("/delete", (req, res) => {});
 
 module.exports = router;

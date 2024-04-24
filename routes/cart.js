@@ -1,6 +1,7 @@
 // import modules
 const express = require("express");
 const checkAuth = require("../middleware/checkAuth");
+const checkNoOverOrder = require("../middleware/checkNoOverOrder");
 
 // import models
 const Cart = require("../models/carts");
@@ -12,17 +13,8 @@ const router = express.Router();
 
 // add/remove products to/from cart
 router.get("/", checkAuth, async (req, res) => {
-  const cart = await Cart.findOne({ user: req.user._id })
-    .populate({
-      path: "products.product",
-      select: "title price",
-    })
-    .exec();
-  if (!cart) {
-    return res.render("cart/index", {
-      message: "Cart doesn't exist.",
-    });
-  }
+  const cart = await checkNoOverOrder(req);
+  if (!cart) return res.redirect("/cart");
   let total = 0;
   for (product of cart.products) {
     total += product.product.price * product.quantity;
