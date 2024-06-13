@@ -6,28 +6,4 @@
 <% } %>
 
 <%- include('partials/message') %>
-
-<!-- sort by -->
-<div class="sort-by-container">
-  <label for="sort-by" class="sort-by-label">Sort By:</label>
-  <ul id="sort-by" name="sort-by" class="sort-by-list">
-    <li id="sort-by-price-low-to-high" name="sort-by-price-low-to-high">Price Low to High</li>
-    <li id="sort-by-price-high-to-low" name="sort-by-price-high-to-low">Price High to Low</li>
-  </ul>
-</div>
-
-<!-- searching -->
-<form action="/" method="GET">
-  <div><label for="keyword"></label>Including Keyword: <input type="text" id="keyword" name="keyword"></div>
-  <div><label for="price-low">Price: </label>
-    <input type="number" id="price_low" name="price_low"> ~
-    <input type="number" id="price_high" name="price_high">
-  </div>
-  <div><label for="category">Category: </label>
-    <select id="category" name="category">
-    </select>
-  </div>
-  <div><button type="submit">Search</button></div>
-</form>
-
 <%- include('./partials/products', { products }) %>

@@ -1,23 +1,23 @@
-<% if (cart.products.length === 0 ) { %>
+<% if (!cart || cart.products.length === 0 ) { %>
 <div class="page-header">You haven't added anything to your cart yet. <br>
   <a href="/">Go get some!</a>
 </div>
 <% } else{ %>
-  <% for (product of cart.products){ %>
+  <% for (item of cart.products){ %>
     <div class="cart-row">
-      <span><%= product.product.title %>,</span>
+      <span><%= item.product.title %>,</span>
       <form action="/cart?_method=PUT" method="POST">
-        <input type="hidden" value="<%= product.product._id %>" name="productId">
+        <input type="hidden" value="<%= item.product._id %>" name="productId">
         <button type="submit" class="btn-add" name="action" value="increment">+</button>
       </form>
-      <span><%= product.quantity %></span>
+      <span><%= item.quantity %></span>
       <form action="/cart?_method=PUT" method="POST">
-        <input type="hidden" value="<%= product.product._id %>" name="productId">
+        <input type="hidden" value="<%= item.product._id %>" name="productId">
         <button type="submit" class="btn-subtract" name="action" value="decrement">-</button>
       </form>
-      <span>Unit Price: $<%= product.product.price %></span>
+      <span>Unit Price: $<%= item.product.price %></span>
       <form action="/cart?_method=DELETE" method="POST">
-        <input type="hidden" value="<%= product.product._id %>" name="productId">
+        <input type="hidden" value="<%= item.product._id %>" name="productId">
         <button type="submit" class="btn-delete">Delete</button>
       </form>
     </div>

@@ -3,6 +3,7 @@ const express = require("express");
 const checkAuth = require("../middleware/checkAuth");
 const checkNoOverOrder = require("../middleware/checkNoOverOrder");
 const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY);
+const nodemailer = require("nodemailer");
 
 // import models
 const Cart = require("../models/carts");
@@ -12,6 +13,21 @@ const Recipient = require("../models/recipients");
 
 // router init
 const router = express.Router();
+
+// nodemailer setups
+const transporter = nodemailer.createTransport({
+  host: "smtp-mail.outlook.com",
+  post: 587,
+  secure: false,
+  auth: {
+    user: process.env.USER,
+    pass: process.env.PASS,
+  },
+  tls: {
+    ciphers: "SSLv3",
+    rejectUnauthorized: false,
+  },
+});
 
 // checkout
 router.get("/", checkAuth, async (req, res) => {
@@ -33,12 +49,7 @@ router.post("/", checkAuth, async (req, res) => {
     address: req.body.address,
   });
 
-  console.log("cart: ", cart);
-  console.log("recipient: ", recipient);
-
-  try {
-    await recipient.save();
-  } catch {
+  try { await recipient.save(); } catch {
     return res.render("checkout/recipientInfo", {
       recipient,
       message: "All inputs are required and need to be valid.",
@@ -50,16 +61,16 @@ router.post("/", checkAuth, async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
-      line_items: cart.products.map((product) => {
+      line_items: cart.products.map((item) => {
         return {
           price_data: {
             currency: "usd",
             product_data: {
-              name: product.product.title,
+              name: item.product.title,
             },
-            unit_amount: product.product.price * 100,
+            unit_amount: item.product.price * 100,
           },
-          quantity: product.quantity,
+          quantity: item.quantity,
         };
       }),
       success_url: `${process.env.CLIENT_URL}`,
@@ -90,6 +101,7 @@ router.post(
     switch (event.type) {
       case "payment_intent.succeeded":
         const paymentIntent = event.data.object;
+        console.log('PaymentIntent was successful!');
         // Get the user associated with the payment
         const user = await User.findOne({
           stripeCustomerId: paymentIntent.customer,
@@ -101,15 +113,49 @@ router.post(
         }
         // Update product inventory/unitsSold & clear user's cart
         const cart = await Cart.findOne({ user: user._id });
-        for (product of cart.products) {
-          await Product.findByIdAndUpdate(product.product, {
-            $inc: { inventory: -product.quantity, unitSold: product.quantity },
+        for (item of cart.products) {
+          await Product.findByIdAndUpdate(item.product, {
+            $inc: { inventory: -item.quantity, unitSold: item.quantity },
           });
         }
         cart.products = [];
         await cart.save();
-        req.session.message =
-          "You've paid for the order successfully. Order details will be sent to your email soon.";
+        
+        // Get the recipient info
+        const recipient = await Recipient.findOne({ buyer: user._id }).sort({ createdAt: -1 });
+        if (!recipient) {
+          console.error("Recipient not found.");
+          res.status(404).send("Recipient not found.");
+          return;
+        }
+
+        // Send email to the user
+        const mailOptions = {
+          from: process.env.USER_WITH_NAME,
+          to: user.email,
+          subject: 'Order Confirmation',
+          text: `Thank you for your purchase! Your order has been confirmed. Here are the recipient details:\n
+          Name: ${recipient.name}\n
+          Email: ${recipient.email}\n
+          Phone Number: ${recipient.phoneNumber}\n
+          Postcode: ${recipient.postcode}\n
+          Address: ${recipient.address}`,
+          html: `<h1>Thank you for your purchase!</h1>
+          <p>Your order has been confirmed. Here are the recipient details:</p>
+          <ul>
+            <li>Name: ${recipient.name}</li>
+            <li>Email: ${recipient.email}</li>
+            <li>Phone Number: ${recipient.phoneNumber}</li>
+            <li>Postcode: ${recipient.postcode}</li>
+            <li>Address: ${recipient.address}</li>
+          </ul>`,
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            return console.log(error);
+          }
+        });
         break;
       default:
         console.log(`Unhandled event type ${event.type}`);

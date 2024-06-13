@@ -16,9 +16,11 @@ router.get("/", checkAuth, async (req, res) => {
   const cart = await checkNoOverOrder(req);
   if (!cart) return res.redirect("/cart");
   let total = 0;
-  for (product of cart.products) {
-    total += product.product.price * product.quantity;
-  }
+  if (cart.products){
+    for (item of cart.products) {
+      total += item.product.price * item.quantity;
+    }
+  }  
   res.render("cart/index", { cart, total });
 });
 

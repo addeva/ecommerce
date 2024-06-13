@@ -166,7 +166,7 @@ router.post("/verify", async (req, res) => {
       });
     }
 
-    // redirecrt the user to /user/signup with check mail message
+    // redirect the user to /user/signup with check mail message
     req.flash(
       "message",
       `Please check your email (${email}) for verification.`
