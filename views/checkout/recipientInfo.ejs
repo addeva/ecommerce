@@ -1,0 +1,37 @@
+  <div class="center-container">
+    <div class="page-header">Recipient Information</div>
+    <form action="/checkout" method="POST">
+      <div class="form-row">
+        <div class="form-item">
+          <label for="name">Name: </label>
+          <input type="text" value="<%= recipient.name %>" id="name" name="name" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-item">
+          <label for="email">Email: </label>
+          <input type="email" value="<%= recipient.email %>" id="email" name="email" required>
+        </div>
+        <div class="form-item">
+          <label for="phoneNumber">Phone Number: </label>
+          <input type="text" value="<%= recipient.phoneNumber %>" id="phoneNumber" name="phoneNumber" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-item form-item-no-grow">
+          <label for="postcode">Postcode: </label>
+          <input type="text" value="<%= recipient.postcode %>" id="postcode" name="postcode" required>
+        </div>
+        <div class="form-item">
+          <label for="address">Address: </label>
+          <input type="text" value="<%= recipient.address %>" id="address" name="address" required>
+        </div>
+      </div>
+      <div class="form-row btn-row form-row-end">
+        <button><a href="/cart">Cancel</a></button>
+        <button type="submit">Checkout</button>
+      </div>
+    </form>
+
+    <%- include('../partials/message') %>
+  </div>

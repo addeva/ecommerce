@@ -1,0 +1,10 @@
+<div class="page-header">Update Product Info</div>
+<form action="/product/update/<%= product._id %>?_method=PUT" method="POST">
+  <%- include("_formFields") %>
+  <div class="form-row btn-row form-row-end">
+    <button><a href="/product/<%= product._id %>">Cancel</a></button>
+    <button type="submit">Update</button>
+  </div>
+</form>
+
+<%- include('../partials/message') %>

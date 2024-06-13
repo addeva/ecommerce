@@ -1,0 +1,11 @@
+:root {
+    --primary-color: #4FB9AF;
+    --secondary-color: #81CDC6;
+    --text-color-deep: #036C5F; 
+    --form-label-font-size: 1rem;
+    --form-label-font-weight: 700;
+    --form-input-font-size: 1rem;
+    --form-input-border-color: #B3E0DC;
+    --form-input-border-color-focus: var(--secondary-color);
+}
+

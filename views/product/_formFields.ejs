@@ -1,0 +1,42 @@
+  <!-- Hidden input fields -->
+  <input type="hidden" value="<%= seller._id %>" name="sellerId" required>
+  <!-- Display companyName -->
+  <div class="form-row">
+    <div class="form-item">
+      <label for="companyName">Company Name: </label>
+      <input type="text" disabled value="<%= seller.companyName %>" id="companyName" name="companyName" required>
+    </div>
+  </div>
+  <!-- input product info -->
+  <div class="form-row">
+    <div class="form-item">
+      <label for="title">Product Name: </label>
+      <input type="text" value="<%= product.title %>" id="title" name="title" required>
+    </div>
+    <div class="form-item">
+      <label for="price">Product Price: </label>
+      <input type="number" value="<%= product.price %>" id="price" name="price" min="1" required>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-item">
+      <label for="inventory">Current Inventory: </label>
+      <input type="number" value="<%= product.inventory %>" id="inventory" name="inventory" required>
+    </div>
+  </div>
+  <div class="form-row align-top">
+    <div class="form-item">
+      <label for="img_url">Product Image URL: </label>
+      <input type="text" value="<%= product.img_url %>" oninput="updateImg()" pattern="https?://.+" id="img_url" name="img_url" required>
+    </div>
+    <div class="form-item">
+      <img class="product-img" id="productImg" src="<%= product.img_url %>" alt="<%= product.title %>">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-item">
+      <label for="description">Product Description: </label>
+      <textarea type="text" id="description" name="description"><%= product.description %></textarea>
+    </div>
+  </div>
+  <script defer src="/javascripts/updateImg.js"></script>

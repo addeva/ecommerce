@@ -1,0 +1,38 @@
+<div class="product-list-container">
+    <ul class="product-list">
+      <% for (product of products) { %>
+      <% if (product.inventory){ %>
+      <li class="product">
+        <a href="/product/<%= product._id %>">
+          <div class="product-img-container">
+            <img class="product-img" src="<%= product.img_url %>" alt="<%= product.title %>">
+          </div>
+          <div class="product-info">
+            <div class="product-price">$<%= product.price %></div>
+            <div class="product-title"><%= product.title %></div>
+          </div>
+        </a>
+        <div class="center-div">
+          <form action="/cart" method="POST">
+            <input type="hidden" value="<%= product._id %>" name="productId">
+            <button type="submit" class="btn-add">Add To Cart</button>
+          </form>
+        </div>
+      </li>
+      <% } else { %>
+      <li class="product">
+        <a href="/product/<%= product._id %>">
+          <div class="product-img-container">
+            <img class="product-img soldout" src="<%= product.img_url %>" alt="<%= product.title %>">
+          </div>
+          <div class="product-info">
+            <div class="product-price soldout">$<%= product.price %></div>
+            <div class="product-title soldout"><%= product.title %></div>
+            <div class="center-div"><div class="soldout-text">Currently Soldout.</div></div>
+          </div>
+        </a>
+      </li>
+      <% } %>
+      <% } %>
+    </ul>
+  </div>
