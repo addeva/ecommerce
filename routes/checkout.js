@@ -75,6 +75,9 @@ router.post("/", checkAuth, async (req, res) => {
       }),
       success_url: `${process.env.CLIENT_URL}`,
       cancel_url: `${process.env.CLIENT_URL}/cart`,
+      payment_intent_data: {
+        metadata: { userId: req.user._id.toString() } // Storing userId in metadata
+      }
     });
     res.redirect(`${session.url}`);
   } catch (e) {
@@ -100,17 +103,21 @@ router.post(
     // Handle the event
     switch (event.type) {
       case "payment_intent.succeeded":
-        const paymentIntent = event.data.object;
+        const session = event.data.object;
         console.log('PaymentIntent was successful!');
+        
+        // Get the user ID from the session metadata
+        const userId = session.metadata.userId;
+        console.log(`session.metadata.userId: ${userId}`)
+
         // Get the user associated with the payment
-        const user = await User.findOne({
-          stripeCustomerId: paymentIntent.customer,
-        });
+        const user = await User.findById(userId);
         if (!user) {
-          console.error("User not found for payment intent.");
+          console.error("User not found for checkout session.");
           res.status(404).send("User not found.");
           return;
         }
+
         // Update product inventory/unitsSold & clear user's cart
         const cart = await Cart.findOne({ user: user._id });
         for (item of cart.products) {
@@ -155,6 +162,7 @@ router.post(
           if (error) {
             return console.log(error);
           }
+          console.log("Email sent:", info.response);
         });
         break;
       default:
